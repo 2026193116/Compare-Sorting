@@ -397,15 +397,3 @@ sequenceDiagram
 4. [Wikipedia — Cocktail shaker sort](https://en.wikipedia.org/wiki/Cocktail_shaker_sort)
 5. [강의 실습 template](https://github.com/lec-algorithm/hw1-sample-2026)
 
----
-
-이 보고서는 알고리즘 자체를 설명하는 정리문이면서, 함께 제공되는 그래프와 실험 구조를 통해 “왜 그 알고리즘이 그렇게 동작하는지”를 보도록 구성되어 있다. 정렬을 단순한 코드 구현이 아니라, 입력 상태에 따라 달라지는 동작 패턴으로 이해하는 데 초점을 두었다.
-
-추가로 필요하다면, 다음 단계로는 이 보고서를 기반으로:
-
-- UML 구조도 버전
-- 발표용 슬라이드 형식 요약본
-- 실험 결과를 정리한 표준 리포트 버전
-- README용 간결 요약본
-
-으로도 확장할 수 있다.
