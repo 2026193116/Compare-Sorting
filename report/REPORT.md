@@ -73,6 +73,10 @@ flowchart TD
     J --> K[report/ 그래프 SVG]
 ```
 
+Mermaid 구조도와 함께 C 구현 파일 사이의 의존 관계를 구체적으로 나타내면 다음과 같다.
+
+![C 구현 파일 구조와 역할](structure.svg)
+
 ### 2.4 실험 흐름 순서도
 
 ```mermaid
@@ -97,6 +101,10 @@ flowchart LR
 - `duplicates`: 중복 값이 많은 배열
 
 이 네 종류는 단일 정렬 알고리즘의 “좋은 경우/나쁜 경우”가 무엇인지 확인하는 데 매우 중요하다. 예를 들어 셸 정렬은 정렬된 배열에서 매우 빠르게 동작할 수 있고, 카운팅 정렬은 값의 범위가 비교적 제한적일 때 강점을 보인다. 반대로 카운팅 정렬은 값의 범위가 너무 넓으면 비효율적이 된다.
+
+입력 형태에 따른 알고리즘의 상대적인 작업량 차이는 다음 개념도로 정리할 수 있다.
+
+![입력 형태에 따른 알고리즘 동작](input-behavior.svg)
 
 ---
 
@@ -123,6 +131,10 @@ for (gap = n / 4; gap > 0; gap /= 2) {
     }
 }
 ```
+
+셸 정렬의 반복 및 gap 감소 흐름은 다음과 같다.
+
+![셸 정렬 진행 구조](shell-sort-flow.svg)
 
 여기서 핵심은 `gap`을 통해 인접하지 않은 원소도 비교할 수 있다는 점이다. 예를 들어 배열의 원소들이 뒤섞여 있어도, 5칸 간격으로 떨어진 원소들이 먼저 정렬되면 이후 gap이 줄어들 때 짧은 거리의 오차를 빠르게 정리할 수 있다.
 
@@ -171,6 +183,10 @@ for (i = n - 1; i >= 0; i--) {
     output[--count[arr[i]]] = arr[i];
 }
 ```
+
+카운팅 정렬의 빈도 계산과 누적합, 출력 배치 흐름은 다음과 같다.
+
+![카운팅 정렬 진행 구조](counting-sort-flow.svg)
 
 이 과정에서 `count[x]`는 값 `x`보다 작거나 같은 원소가 총 몇 개인지를 의미한다. 이 누적 정보를 이용해 각 값이 어디에 배치되어야 하는지를 결정한다. 마지막으로 뒤에서부터 원소를 넣으면 중복 값이 있어도 안정성을 유지할 수 있게 된다.
 
@@ -229,6 +245,10 @@ for (left = 0, right = n - 1; left < right; ) {
     if (!swapped) break;
 }
 ```
+
+칵테일 셰이커 정렬의 양방향 순회와 조기 종료 흐름은 다음과 같다.
+
+![칵테일 셰이커 정렬 진행 구조](cocktail-shaker-sort-flow.svg)
 
 이 구조는 “한 바퀴를 왼쪽에서 오른쪽으로, 한 바퀴를 오른쪽에서 왼쪽으로” 진행한다는 점이 중요하다. 이것은 버블 정렬의 단일 방향 순회를 보완하는 형태다.
 
@@ -396,4 +416,3 @@ sequenceDiagram
 3. [Wikipedia — Counting sort](https://en.wikipedia.org/wiki/Counting_sort)
 4. [Wikipedia — Cocktail shaker sort](https://en.wikipedia.org/wiki/Cocktail_shaker_sort)
 5. [강의 실습 template](https://github.com/lec-algorithm/hw1-sample-2026)
-
