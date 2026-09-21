@@ -1,9 +1,13 @@
 #include "sort.h"
 
-/* Knuth gap 수열을 큰 간격에서 1까지 줄이며 삽입 정렬을 반복한다. */
+/*
+ * Shell sort with a quarter-size initial gap.
+ * The gap sequence is floor(n / 4), floor(n / 8), ... , 1.
+ */
 void shellSort(int a[], size_t n, SortStats *s) {
-    size_t gap = 1;
-    while (gap < n / 3) gap = gap * 3 + 1;
+    size_t gap = n / 4;
+    if (gap == 0) gap = 1;
+
     while (gap > 0) {
         for (size_t i = gap; i < n; ++i) {
             int value = a[i];
@@ -11,10 +15,15 @@ void shellSort(int a[], size_t n, SortStats *s) {
             while (j >= gap) {
                 s->comparisons++;
                 if (a[j - gap] <= value) break;
-                a[j] = a[j - gap]; s->moves++; j -= gap;
+                a[j] = a[j - gap];
+                s->moves++;
+                j -= gap;
             }
-            if (j != i) { a[j] = value; s->moves++; }
+            if (j != i) {
+                a[j] = value;
+                s->moves++;
+            }
         }
-        gap = (gap - 1) / 3;
+        gap /= 2;
     }
 }
