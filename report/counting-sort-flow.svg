@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 650">
+<style>text{font:16px sans-serif;fill:#18212f}.title{font-size:25px;font-weight:700}.step{fill:#edf4fb;stroke:#52739b;stroke-width:2}.decision{fill:#fff4d6;stroke:#c58a18;stroke-width:2}.end{fill:#e7f5e9;stroke:#4c956c;stroke-width:2}.arrow{stroke:#52606d;stroke-width:2;fill:none;marker-end:url(#a)}</style>
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#52606d"/></marker></defs>
+<text class="title" x="550" y="34" text-anchor="middle">카운팅 정렬 진행 구조</text>
+<rect class="step" x="390" y="55" width="320" height="55" rx="10"/><text x="550" y="89" text-anchor="middle">min, max 탐색 → range 계산</text><path class="arrow" d="M550 110 V140"/>
+<rect class="step" x="390" y="140" width="320" height="55" rx="10"/><text x="550" y="174" text-anchor="middle">count[0..range-1]와 output 생성</text><path class="arrow" d="M550 195 V225"/>
+<rect class="step" x="390" y="225" width="320" height="55" rx="10"/><text x="550" y="259" text-anchor="middle">각 값의 빈도 count[x] 증가</text><path class="arrow" d="M550 280 V310"/>
+<rect class="step" x="390" y="310" width="320" height="55" rx="10"/><text x="550" y="344" text-anchor="middle">count를 누적합으로 변환</text><path class="arrow" d="M550 365 V395"/>
+<rect class="decision" x="360" y="395" width="380" height="70" rx="10"/><text x="550" y="425" text-anchor="middle">뒤에서부터 모든 입력을 처리했는가?</text><text x="550" y="448" text-anchor="middle">아니오 → output 위치에 배치</text>
+<path class="arrow" d="M740 430 H900 V515 H710"/><text x="820" y="420">아니오</text>
+<rect class="step" x="390" y="515" width="320" height="55" rx="10"/><text x="550" y="549" text-anchor="middle">output[--count[value-min]] = value</text><path class="arrow" d="M390 542 H250 V260 H390"/>
+<path class="arrow" d="M550 465 V600"/><text x="590" y="490">예</text>
+<rect class="end" x="410" y="600" width="280" height="40" rx="10"/><text x="550" y="626" text-anchor="middle">output을 a에 복사 → 종료</text>
+</svg>

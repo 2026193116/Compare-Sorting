@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760">
+<style>text{font:16px sans-serif;fill:#18212f}.title{font-size:26px;font-weight:700}.label{font-size:18px;font-weight:700}.small{font-size:14px}.box{fill:#f7f9fc;stroke:#52739b;stroke-width:2}.header{fill:#e8f0f8;stroke:#52739b;stroke-width:2}.arrow{stroke:#52606d;stroke-width:2;fill:none;marker-end:url(#arrow)}</style>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#52606d"/></marker></defs>
+<text class="title" x="600" y="38" text-anchor="middle">C 구현 파일 구조와 역할</text>
+<rect class="header" x="430" y="65" width="340" height="62" rx="10"/><text class="label" x="600" y="91" text-anchor="middle">src/main.c</text><text class="small" x="600" y="113" text-anchor="middle">입력·실험·검증·출력 조정</text>
+<path class="arrow" d="M600 127 V165"/>
+<rect class="box" x="410" y="165" width="380" height="72" rx="10"/><text class="label" x="600" y="194" text-anchor="middle">src/sort.h</text><text class="small" x="600" y="216" text-anchor="middle">알고리즘 선언 · 레지스트리 인터페이스</text>
+<path class="arrow" d="M500 237 L245 290"/><path class="arrow" d="M600 237 V290"/><path class="arrow" d="M700 237 L955 290"/>
+<rect class="box" x="70" y="290" width="350" height="100" rx="10"/><text class="label" x="245" y="320" text-anchor="middle">src/sortctx.h</text><text class="small" x="245" y="345" text-anchor="middle">SortStats: comparisons / moves</text><text class="small" x="245" y="368" text-anchor="middle">SortFunction 함수 포인터 타입</text>
+<rect class="box" x="425" y="290" width="350" height="100" rx="10"/><text class="label" x="600" y="320" text-anchor="middle">src/sort.c</text><text class="small" x="600" y="345" text-anchor="middle">SORT_ALGORITHMS 레지스트리</text><text class="small" x="600" y="368" text-anchor="middle">이름 · 복잡도 · 안정성 · 함수 연결</text>
+<rect class="box" x="780" y="290" width="350" height="100" rx="10"/><text class="label" x="955" y="320" text-anchor="middle">정렬 구현 파일</text><text class="small" x="955" y="345" text-anchor="middle">shellSort.c · countingSort.c</text><text class="small" x="955" y="368" text-anchor="middle">cocktailShakerSort.c</text>
+<path class="arrow" d="M600 390 V440"/><path class="arrow" d="M245 390 V475 H600 V440"/><path class="arrow" d="M955 390 V475 H600 V440"/>
+<rect class="header" x="410" y="440" width="380" height="72" rx="10"/><text class="label" x="600" y="470" text-anchor="middle">공통 실행 경로</text><text class="small" x="600" y="493" text-anchor="middle">동일 입력 복사 → 함수 호출 → 통계 기록</text>
+<path class="arrow" d="M600 512 V560"/>
+<rect class="box" x="300" y="560" width="600" height="100" rx="10"/><text class="label" x="600" y="590" text-anchor="middle">실험 산출물</text><text class="small" x="600" y="615" text-anchor="middle">정렬 검증 · 표/CSV 출력 · report 그래프 생성</text><text class="small" x="600" y="640" text-anchor="middle">tests/test_sort.c는 각 구현의 경계 조건과 결과를 검사</text>
+</svg>

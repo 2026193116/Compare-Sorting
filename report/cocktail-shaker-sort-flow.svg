@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 700">
+<style>text{font:16px sans-serif;fill:#18212f}.title{font-size:25px;font-weight:700}.step{fill:#edf4fb;stroke:#52739b;stroke-width:2}.decision{fill:#fff4d6;stroke:#c58a18;stroke-width:2}.end{fill:#e7f5e9;stroke:#4c956c;stroke-width:2}.arrow{stroke:#52606d;stroke-width:2;fill:none;marker-end:url(#a)}</style>
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#52606d"/></marker></defs>
+<text class="title" x="560" y="34" text-anchor="middle">칵테일 셰이커 정렬 진행 구조</text>
+<rect class="step" x="420" y="55" width="280" height="52" rx="10"/><text x="560" y="87" text-anchor="middle">left = 0, right = n-1</text><path class="arrow" d="M560 107 V140"/>
+<rect class="decision" x="410" y="140" width="300" height="60" rx="10"/><text x="560" y="176" text-anchor="middle">swapped가 참인가?</text><path class="arrow" d="M410 170 H180 V240"/><text x="295" y="160">아니오</text>
+<rect class="end" x="55" y="240" width="250" height="52" rx="10"/><text x="180" y="272" text-anchor="middle">정렬 완료 → 종료</text><path class="arrow" d="M560 200 V235"/><text x="600" y="220">예</text>
+<rect class="step" x="390" y="235" width="340" height="62" rx="10"/><text x="560" y="263" text-anchor="middle">swapped = false</text><text x="560" y="285" text-anchor="middle">left → right 방향 순회</text><path class="arrow" d="M560 297 V330"/>
+<rect class="decision" x="380" y="330" width="360" height="70" rx="10"/><text x="560" y="359" text-anchor="middle">a[i] &gt; a[i+1] 인가?</text><text x="560" y="382" text-anchor="middle">예 → 교환, moves 증가</text><path class="arrow" d="M380 365 H190 V445"/><text x="285" y="355">아니오</text>
+<rect class="step" x="50" y="445" width="280" height="58" rx="10"/><text x="190" y="480" text-anchor="middle">i++ → 오른쪽 끝까지 반복</text><path class="arrow" d="M330 474 H380 V365"/>
+<path class="arrow" d="M740 365 H900 V445"/><text x="815" y="355">예</text>
+<rect class="step" x="760" y="445" width="300" height="58" rx="10"/><text x="910" y="480" text-anchor="middle">right--</text><path class="arrow" d="M910 503 V545 H560"/>
+<rect class="decision" x="380" y="545" width="360" height="70" rx="10"/><text x="560" y="574" text-anchor="middle">오른쪽 → 왼쪽 순회</text><text x="560" y="598" text-anchor="middle">a[i-1] &gt; a[i]면 교환</text><path class="arrow" d="M380 580 H250 V170 H410"/><text x="315" y="565">left++, 다음 왕복</text>
+</svg>
