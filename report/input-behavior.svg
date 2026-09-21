@@ -1,1 +1,60 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400"><style>text{font:14px sans-serif}.title{font-size:20px;font-weight:bold}</style><text class="title" x="20" y="30">Input sensitivity (conceptual)</text><line x1="50" y1="330" x2="730" y2="330" stroke="black"/><rect x="70" y="280" width="120" height="50" fill="#4e79a7"/><rect x="290" y="180" width="120" height="150" fill="#59a14f"/><rect x="510" y="80" width="120" height="250" fill="#e15759"/><text x="130" y="354" text-anchor="middle">sorted</text><text x="350" y="354" text-anchor="middle">random</text><text x="570" y="354" text-anchor="middle">reverse</text><text x="130" y="270" text-anchor="middle">1</text><text x="350" y="170" text-anchor="middle">3</text><text x="570" y="70" text-anchor="middle">5</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400">
+  <style>
+    text { font: 14px sans-serif; fill: #222; }
+    .title { font-size: 20px; font-weight: bold; }
+    .axis { stroke: #555; stroke-width: 1.5; }
+    .grid { stroke: #ddd; stroke-width: 1; }
+    .legend { font-size: 12px; }
+  </style>
+
+  <text class="title" x="20" y="30">Input sensitivity (conceptual)</text>
+  <text transform="translate(20 220) rotate(-90)" text-anchor="middle">relative work</text>
+
+  <!-- axes -->
+  <line class="axis" x1="80" y1="60" x2="80" y2="320"/>
+  <line class="axis" x1="80" y1="320" x2="700" y2="320"/>
+
+  <!-- grid -->
+  <line class="grid" x1="80" y1="320" x2="700" y2="320"/>
+  <line class="grid" x1="80" y1="260" x2="700" y2="260"/>
+  <line class="grid" x1="80" y1="200" x2="700" y2="200"/>
+  <line class="grid" x1="80" y1="140" x2="700" y2="140"/>
+  <line class="grid" x1="80" y1="80" x2="700" y2="80"/>
+
+  <!-- x labels -->
+  <text x="150" y="350" text-anchor="middle">random</text>
+  <text x="310" y="350" text-anchor="middle">sorted</text>
+  <text x="470" y="350" text-anchor="middle">reverse</text>
+  <text x="630" y="350" text-anchor="middle">duplicates</text>
+
+  <!-- shell sort: starts at gap = n/4, then halves -->
+  <polyline fill="none" stroke="#4e79a7" stroke-width="3" points="150,210 310,180 470,105 630,145"/>
+  <circle cx="150" cy="210" r="4" fill="#4e79a7"/>
+  <circle cx="310" cy="180" r="4" fill="#4e79a7"/>
+  <circle cx="470" cy="105" r="4" fill="#4e79a7"/>
+  <circle cx="630" cy="145" r="4" fill="#4e79a7"/>
+
+  <!-- counting sort -->
+  <polyline fill="none" stroke="#59a14f" stroke-width="3" points="150,260 310,245 470,238 630,248"/>
+  <circle cx="150" cy="260" r="4" fill="#59a14f"/>
+  <circle cx="310" cy="245" r="4" fill="#59a14f"/>
+  <circle cx="470" cy="238" r="4" fill="#59a14f"/>
+  <circle cx="630" cy="248" r="4" fill="#59a14f"/>
+
+  <!-- cocktail shaker -->
+  <polyline fill="none" stroke="#e15759" stroke-width="3" points="150,200 310,280 470,90 630,120"/>
+  <circle cx="150" cy="200" r="4" fill="#e15759"/>
+  <circle cx="310" cy="280" r="4" fill="#e15759"/>
+  <circle cx="470" cy="90" r="4" fill="#e15759"/>
+  <circle cx="630" cy="120" r="4" fill="#e15759"/>
+
+  <!-- legend -->
+  <line x1="100" y1="370" x2="130" y2="370" stroke="#4e79a7" stroke-width="3"/>
+  <text class="legend" x="140" y="374">Shell (gap = n/4 → 1)</text>
+
+  <line x1="320" y1="370" x2="350" y2="370" stroke="#59a14f" stroke-width="3"/>
+  <text class="legend" x="360" y="374">Counting</text>
+
+  <line x1="470" y1="370" x2="500" y2="370" stroke="#e15759" stroke-width="3"/>
+  <text class="legend" x="510" y="374">Cocktail</text>
+</svg>
