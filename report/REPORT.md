@@ -66,7 +66,7 @@ Python 구현도 같은 원리를 따른다. `src/main.py`는 입력 생성과 �
 
 ```mermaid
 flowchart TD
-    A[사용자/실험 실행] --> B[main.c/main.py]
+    A[사용자/실험 실행] --> B[main.c / main.py]
     B --> C[입력 생성기]
     C --> D[random / sorted / reverse / duplicates]
     B --> E[알고리즘 호출]
