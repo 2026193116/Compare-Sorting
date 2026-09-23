@@ -184,31 +184,7 @@ flowchart LR
 
 핵심 아이디어는 “큰 값이 멀리 떨어진 곳에 있으면 큰 간격으로 먼저 정리하고, 점점 세밀하게 다듬는다”는 점이다. 이 방식은 단순 삽입 정렬보다 더 빠르게 큰 값들을 이동시키고, 점차 정렬 범위를 줄여 최종적으로 전체 배열을 정렬한다.
 
-#### Python 구현 관점의 설명
-
-파이썬 버전의 셸 정렬은 `src/shell_sort.py`에 위치하며, C 구현과 동일하게 큰 간격부터 시작해 점차 gap을 줄여 나가는 구조를 사용한다. Python에서는 리스트 인덱싱과 슬라이싱을 이용해 배열을 직접 수정하고, 내부 `while` 루프로 간격에 맞춰 원소를 이동시킨다. C 코드와 비교하면 반복 구조는 동일하지만, 메모리 안전성과 포인터 사용이 아니라 Python의 리스트와 인덱싱 방식으로 구현된다는 차이가 있다.
-
-```python
-def shell_sort(values):
-    result = list(values)
-    gap = max(1, len(result) // 4)
-
-    while gap > 0:
-        for index in range(gap, len(result)):
-            value = result[index]
-            j = index
-            while j >= gap and result[j - gap] > value:
-                result[j] = result[j - gap]
-                j -= gap
-            result[j] = value
-        gap //= 2
-
-    return result
-```
-
-이 구현은 C 코드와 같은 핵심 아이디어를 유지한다. `gap` 값이 커질수록 멀리 떨어진 원소들이 빠르게 정렬되고, gap이 줄어들수록 세밀한 정렬이 이루어진다. 이러한 구조 덕분에 셸 정렬은 무작위 입력에서도 비교적 안정적인 성능을 기대할 수 있다.
-
-#### 코드 관점의 설명
+#### C언어 구현 관점의 설명
 
 ```c
 for (gap = n / 4; gap > 0; gap /= 2) {
@@ -229,6 +205,30 @@ for (gap = n / 4; gap > 0; gap /= 2) {
 ![셸 정렬 진행 구조](shell-sort-flow.svg)
 
 여기서 핵심은 `gap`을 통해 인접하지 않은 원소도 비교할 수 있다는 점이다. 예를 들어 배열의 원소들이 뒤섞여 있어도, 5칸 간격으로 떨어진 원소들이 먼저 정렬되고, 이후 점점 좁은 간격으로 정렬이 마무리된다.
+
+#### Python 구현 관점의 설명
+
+파이썬 버전의 셸 정렬은 C 구현과 동일하게 큰 간격부터 시작해 점차 gap을 줄여 나가는 구조를 사용한다. Python에서는 리스트 인덱싱과 슬라이싱을 이용해 배열을 직접 수정하고, 내부 `while` 루프로 간격에 맞춰 원소를 이동시킨다. C 코드와 비교하면 반복 구조는 동일하지만, 메모리 안전성과 포인터 사용이 아니라 Python의 리스트와 인덱싱 방식으로 구현된다는 차이가 있다.
+
+```python
+def shell_sort(values):
+    result = list(values)
+    gap = max(1, len(result) // 4)
+
+    while gap > 0:
+        for index in range(gap, len(result)):
+            value = result[index]
+            j = index
+            while j >= gap and result[j - gap] > value:
+                result[j] = result[j - gap]
+                j -= gap
+            result[j] = value
+        gap //= 2
+
+    return result
+```
+
+이 구현은 C 코드와 같은 핵심 아이디어를 유지한다. `gap` 값이 커질수록 멀리 떨어진 원소들이 빠르게 정렬되고, gap이 줄어들수록 세밀한 정렬이 이루어진다. 이러한 구조 덕분에 셸 정렬은 무작위 입력에서도 비교적 안정적인 성능을 기대할 수 있다.
 
 #### 장단점
 
@@ -257,32 +257,7 @@ for (gap = n / 4; gap > 0; gap /= 2) {
 
 이 방식은 비교 기반 정렬이 아니라 “빈도 기반 정렬”에 가깝다. 따라서 정렬 대상 값이 작은 범위의 정수일 때, 비교 횟수보다 값의 등장 횟수 누적이 성능을 좌우한다.
 
-#### Python 구현 관점의 설명
-
-파이썬 구현은 `src/counting_sort.py`에 있으며, 입력 값을 기준으로 최소값과 최대값을 구한 뒤 그 범위만큼의 카운트 배열을 만든다. 이후 각 값의 빈도를 세고, 누적합 방식으로 정렬 위치를 계산하여 새로운 리스트에 다시 배치한다. 여기서 중요한 점은 Python에서는 별도의 리스트 생성과 순회가 비교적 직관적으로 표현되지만, 내부적으로는 C 구현과 같은 빈도 누적과 재배치 과정이 동일하게 동작한다는 것이다.
-
-```python
-def counting_sort(values):
-    result = list(values)
-    if not result:
-        return []
-
-    minimum = min(result)
-    maximum = max(result)
-    counts = [0] * (maximum - minimum + 1)
-
-    for value in result:
-        counts[value - minimum] += 1
-
-    sorted_values = []
-    for offset, amount in enumerate(counts):
-        sorted_values.extend([offset + minimum] * amount)
-    return sorted_values
-```
-
-이 코드에서 `counts` 배열은 값의 빈도를 저장하는 역할을 하며, 각 값이 실제로 어디에 놓여야 하는지를 번호로 표시하는 누적 구조로 활용된다. 값의 범위가 작을수록 리스트의 크기가 작아서 정렬이 매우 빠르게 수행된다.
-
-#### 코드 관점의 설명
+#### C언어 구현 관점의 설명
 
 ```c
 int max = findMax(arr, n);
@@ -306,6 +281,31 @@ for (i = n - 1; i >= 0; i--) {
 ![카운팅 정렬 진행 구조](counting-sort-flow.svg)
 
 이 과정에서 `count[x]`는 값 `x`보다 작거나 같은 원소가 총 몇 개인지를 의미한다. 이 누적 정보를 이용해 각 값이 어디에 배치되어야 하는지를 결정한다.
+
+#### Python 구현 관점의 설명
+
+파이썬 구현은 입력 값을 기준으로 최소값과 최대값을 구한 뒤 그 범위만큼의 카운트 배열을 만든다. 이후 각 값의 빈도를 세고, 누적합 방식으로 정렬 위치를 계산하여 새로운 리스트에 다시 배치한다. 여기서 중요한 점은 Python에서는 별도의 리스트 생성과 순회가 비교적 직관적으로 표현되지만, 내부적으로는 C 구현과 같은 빈도 누적과 재배치 과정이 동일하게 동작한다.
+
+```python
+def counting_sort(values):
+    result = list(values)
+    if not result:
+        return []
+
+    minimum = min(result)
+    maximum = max(result)
+    counts = [0] * (maximum - minimum + 1)
+
+    for value in result:
+        counts[value - minimum] += 1
+
+    sorted_values = []
+    for offset, amount in enumerate(counts):
+        sorted_values.extend([offset + minimum] * amount)
+    return sorted_values
+```
+
+이 코드에서 `counts` 배열은 값의 빈도를 저장하는 역할을 하며, 각 값이 실제로 어디에 놓여야 하는지를 번호로 표시하는 누적 구조로 활용된다. 값의 범위가 작을수록 리스트의 크기가 작아서 정렬이 매우 빠르게 수행된다.
 
 #### 안정성
 
@@ -337,40 +337,7 @@ for (i = n - 1; i >= 0; i--) {
 
 이 알고리즘은 특히 배열이 양 끝에서 이미 정렬된 상태에 가까울 때 유리할 수 있다. 그러나 전체적으로는 비교 횟수와 교환 횟수가 많아지기 쉬워, 무작위 입력에서는 큰 이점을 얻기 어렵다.
 
-#### Python 구현 관점의 설명
-
-파이썬 구현은 `src/cocktail_shaker_sort.py`에 있으며, `left`와 `right` 인덱스가 각각 배열의 시작과 끝을 가리키면서 양방향으로 정렬을 진행한다. 먼저 왼쪽에서 오른쪽으로 큰 값을 뒤로 보내고, 그다음 오른쪽에서 왼쪽으로 작은 값을 앞으로 보낸다. 한 번의 패스가 끝난 뒤 `swapped` 값이 `False`이면 정렬이 완료된 것으로 간주하고 조기 종료한다.
-
-```python
-def cocktail_shaker_sort(values):
-    result = list(values)
-    left = 0
-    right = len(result) - 1
-
-    while left < right:
-        swapped = False
-
-        for index in range(left, right):
-            if result[index] > result[index + 1]:
-                result[index], result[index + 1] = result[index + 1], result[index]
-                swapped = True
-
-        right -= 1
-        for index in range(right, left, -1):
-            if result[index - 1] > result[index]:
-                result[index - 1], result[index] = result[index], result[index - 1]
-                swapped = True
-
-        left += 1
-        if not swapped:
-            break
-
-    return result
-```
-
-이 구현은 버블 정렬과 매우 비슷하지만, 한 방향에서 끝까지 비교하는 대신 양쪽에서 번갈아 비교하며 정렬을 진행한다. 그래서 전체적으로는 버블 정렬보다 약간 더 나은 성능을 기대할 수 있으나, 구조적으로 여전히 `O(n²)`에 근접한 동작을 하고 있다는 점은 변하지 않는다.
-
-#### 코드 관점의 설명
+#### C언어 구현 관점의 설명
 
 ```c
 for (left = 0, right = n - 1; left < right; ) {
@@ -401,6 +368,39 @@ for (left = 0, right = n - 1; left < right; ) {
 ![칵테일 셰이커 정렬 진행 구조](cocktail-shaker-sort-flow.svg)
 
 이 구조는 “한 바퀴를 왼쪽에서 오른쪽으로, 한 바퀴를 오른쪽에서 왼쪽으로” 진행한다는 점이 중요하다. 이것은 버블 정렬의 단일 방향 순회를 개선한 형태라고 볼 수 있다.
+
+#### Python 구현 관점의 설명
+
+파이썬 구현은 `left`와 `right` 인덱스가 각각 배열의 시작과 끝을 가리키면서 양방향으로 정렬을 진행한다. 먼저 왼쪽에서 오른쪽으로 큰 값을 뒤로 보내고, 그다음 오른쪽에서 왼쪽으로 작은 값을 앞으로 보낸다. 한 번의 패스가 끝난 뒤 `swapped` 값이 `False`이면 정렬이 완료된 것으로 간주하고 조기 종료한다.
+
+```python
+def cocktail_shaker_sort(values):
+    result = list(values)
+    left = 0
+    right = len(result) - 1
+
+    while left < right:
+        swapped = False
+
+        for index in range(left, right):
+            if result[index] > result[index + 1]:
+                result[index], result[index + 1] = result[index + 1], result[index]
+                swapped = True
+
+        right -= 1
+        for index in range(right, left, -1):
+            if result[index - 1] > result[index]:
+                result[index - 1], result[index] = result[index], result[index - 1]
+                swapped = True
+
+        left += 1
+        if not swapped:
+            break
+
+    return result
+```
+
+이 구현은 버블 정렬과 매우 비슷하지만, 한 방향에서 끝까지 비교하는 대신 양쪽에서 번갈아 비교하며 정렬을 진행한다. 그래서 전체적으로는 버블 정렬보다 약간 더 나은 성능을 기대할 수 있으나, 구조적으로 여전히 `O(n²)`에 근접한 동작을 하고 있다는 점은 변하지 않는다.
 
 #### 장단점
 
