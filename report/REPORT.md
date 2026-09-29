@@ -561,8 +561,11 @@ Python 실험도 이 구조를 그대로 따라간다. `src/main.py`는 입력�
 
 ## 8. 참고 자료
 
+- 사용한 AI : Copilot
 1. [Wikipedia — Sorting algorithm](https://en.wikipedia.org/wiki/Sorting_algorithm)
 2. [Wikipedia — Shellsort](https://en.wikipedia.org/wiki/Shellsort)
 3. [Wikipedia — Counting sort](https://en.wikipedia.org/wiki/Counting_sort)
 4. [Wikipedia — Cocktail shaker sort](https://en.wikipedia.org/wiki/Cocktail_shaker_sort)
 5. [강의 실습 template](https://github.com/lec-algorithm/hw1-sample-2026)
+
+---
