@@ -33,11 +33,34 @@ python3 src/main.py
 ## 저장소 구조
 
 ```text
-src/       sort.h, sort.c, shellSort.c, countingSort.c, cocktailShakerSort.c
-           main.c, sort.py, main.py
-tests/     test_sort.c, test_sort.py
-tools/     plot.py
-report/    REPORT.md, algorithm-flow.html, *.svg, results.csv
+src/
+  sort.h
+  sortctx.h
+  sort.c
+  shellSort.c
+  countingSort.c
+  cocktailShakerSort.c
+  main.c
+
+  sort.py
+  sort_stats.py
+  shell_sort.py
+  counting_sort.py
+  cocktail_shaker_sort.py
+  main.py
+
+tests/
+  test_sort.c
+  test_sort.py
+
+tools/
+  plot.py
+
+report/
+  REPORT.md
+  algorithm-flow.html
+  results.csv
+  *.svg
 ```
 
 모든 C 빌드는 `Makefile`을 거치며 실행 파일은 `*.out`으로 생성됩니다. 외부 라이브러리는 사용하지 않습니다.
