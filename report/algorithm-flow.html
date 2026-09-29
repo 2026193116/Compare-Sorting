@@ -1,1 +1,417 @@
-<!doctype html><meta charset="utf-8"><title>Sorting visualizer</title><style>body{font:16px sans-serif;max-width:900px;margin:2em auto}button{margin:.3em;padding:.5em}#array{display:flex;gap:4px;align-items:end;height:260px}i{display:block;background:#4e79a7;width:28px;text-align:center;color:white;font-style:normal}p{line-height:1.5}</style><h1>정렬 과정 시각화</h1><p>한 라운드씩 실행하여 세 알고리즘의 핵심 동작을 확인한다. 값이 클수록 막대가 높다.</p><button onclick="start('shell')">셸 정렬</button><button onclick="start('counting')">카운팅 정렬</button><button onclick="start('cocktail')">칵테일 셰이커</button><button onclick="step()">다음 단계</button><div id="array"></div><p id="note"></p><script>let a=[],i=0,mode='';function draw(){array.innerHTML=a.map(x=>`<i style="height:${x*12}px">${x}</i>`).join('')}function start(m){mode=m;a=[7,2,6,1,5,3,4];i=0;note.textContent=m+' 시작';draw()}function step(){if(!a.length)return;if(mode==='counting'){a.sort((x,y)=>x-y);note.textContent='빈도 배열을 읽어 작은 값부터 출력';}else{let end=a.length-1;for(let j=0;j<end;j++)if(a[j]>a[j+1]){[a[j],a[j+1]]=[a[j+1],a[j]];break}note.textContent=mode==='shell'?'gap 간격의 삽입 정렬 단계':'왼쪽→오른쪽 패스의 인접 교환'}i++;draw()}</script>
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Sorting Visualizer</title>
+  <style>
+    body {
+      font: 16px sans-serif;
+      max-width: 900px;
+      margin: 2em auto;
+      padding: 0 1em;
+    }
+
+    button {
+      margin: 0.3em;
+      padding: 0.6em 1em;
+      cursor: pointer;
+    }
+
+    #array {
+      display: flex;
+      gap: 4px;
+      align-items: end;
+      height: 260px;
+      margin-top: 1.5em;
+    }
+
+    i {
+      display: block;
+      background: #4e79a7;
+      width: 28px;
+      text-align: center;
+      color: white;
+      font-style: normal;
+    }
+
+    p {
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>정렬 과정 시각화</h1>
+
+  <p>
+    한 번의 "다음 단계"는 각 알고리즘의 실제 핵심 단계를
+    수행한다.
+  </p>
+
+  <button onclick="start('shell')">
+    셸 정렬
+  </button>
+
+  <button onclick="start('counting')">
+    카운팅 정렬
+  </button>
+
+  <button onclick="start('cocktail')">
+    칵테일 셰이커
+  </button>
+
+  <button onclick="step()">
+    다음 단계
+  </button>
+
+  <div id="array"></div>
+  <p id="note"></p>
+
+  <script>
+    const INITIAL = [7, 2, 6, 1, 5, 3, 4];
+
+    const arrayElement =
+      document.getElementById("array");
+
+    const noteElement =
+      document.getElementById("note");
+
+    let array = [];
+    let state = null;
+
+    function draw() {
+      arrayElement.innerHTML = array
+        .map((value) => {
+          if (value === null) {
+            return '<i style="height:8px"></i>';
+          }
+
+          const height = Math.max(
+            8,
+            value * 12
+          );
+
+          return (
+            `<i style="height:${height}px">` +
+            `${value}` +
+            `</i>`
+          );
+        })
+        .join("");
+    }
+
+    function finish(message) {
+      state.done = true;
+      noteElement.textContent = message;
+      draw();
+    }
+
+    function start(mode) {
+      array = INITIAL.slice();
+
+      state = {
+        mode,
+        done: false,
+
+        /* Shell */
+        gap: 0,
+        shellIndex: 0,
+
+        /* Counting */
+        source: null,
+        minimum: 0,
+        maximum: 0,
+        counts: null,
+        output: null,
+        countIndex: 0,
+        outputIndex: 0,
+
+        /* Cocktail */
+        left: 0,
+        right: array.length - 1,
+      };
+
+      if (mode === "shell") {
+        state.gap = Math.max(
+          1,
+          Math.floor(array.length / 4)
+        );
+        state.shellIndex = state.gap;
+
+        noteElement.textContent =
+          `Shell sort 시작: gap=${state.gap}`;
+      }
+
+      if (mode === "counting") {
+        state.source = array.slice();
+        state.minimum = Math.min(...array);
+        state.maximum = Math.max(...array);
+
+        state.counts = new Array(
+          state.maximum - state.minimum + 1
+        ).fill(0);
+
+        state.output = new Array(
+          array.length
+        ).fill(null);
+
+        state.countIndex = 0;
+
+        noteElement.textContent =
+          `Counting sort: 범위 ` +
+          `${state.minimum} ~ ${state.maximum}`;
+      }
+
+      if (mode === "cocktail") {
+        state.left = 0;
+        state.right = array.length - 1;
+        state.phase = "forward";
+
+        noteElement.textContent =
+          "Cocktail shaker sort 시작";
+      }
+
+      draw();
+    }
+
+    function shellStep() {
+      if (state.shellIndex >= array.length) {
+        state.gap = Math.floor(state.gap / 2);
+
+        if (state.gap === 0) {
+          finish("Shell sort 완료");
+          return;
+        }
+
+        state.shellIndex = state.gap;
+
+        noteElement.textContent =
+          `다음 gap=${state.gap}`;
+
+        draw();
+        return;
+      }
+
+      const index = state.shellIndex;
+      const value = array[index];
+      let position = index;
+
+      while (
+        position >= state.gap &&
+        array[position - state.gap] > value
+      ) {
+        array[position] =
+          array[position - state.gap];
+
+        position -= state.gap;
+      }
+
+      array[position] = value;
+
+      noteElement.textContent =
+        `gap=${state.gap}, ` +
+        `index=${index} 삽입 완료`;
+
+      state.shellIndex += 1;
+
+      draw();
+    }
+
+    function countingStep() {
+      if (state.countIndex < state.source.length) {
+        const value =
+          state.source[state.countIndex];
+
+        state.counts[
+          value - state.minimum
+        ] += 1;
+
+        noteElement.textContent =
+          `빈도 계산: value=${value}`;
+
+        state.countIndex += 1;
+        draw();
+        return;
+      }
+
+      if (
+        state.countIndex === state.source.length
+        && !state.prefixDone
+      ) {
+        state.prefixDone = true;
+        state.prefixIndex = 1;
+
+        noteElement.textContent =
+          "누적합 계산 시작";
+
+        return;
+      }
+
+      if (
+        state.prefixDone &&
+        state.prefixIndex <
+          state.counts.length
+      ) {
+        const index = state.prefixIndex;
+
+        state.counts[index] +=
+          state.counts[index - 1];
+
+        state.prefixIndex += 1;
+
+        noteElement.textContent =
+          `누적합: count[${index}]`;
+
+        return;
+      }
+
+      if (
+        state.prefixDone &&
+        state.prefixIndex >= state.counts.length
+        && state.outputIndex === 0
+      ) {
+        state.outputIndex =
+          state.source.length - 1;
+
+        noteElement.textContent =
+          "출력 배열에 배치 시작";
+
+        array = state.output.slice();
+        draw();
+        return;
+      }
+
+      if (state.outputIndex >= 0) {
+        const index =
+          state.outputIndex;
+
+        const value =
+          state.source[index];
+
+        const offset =
+          value - state.minimum;
+
+        state.counts[offset] -= 1;
+
+        const position =
+          state.counts[offset];
+
+        state.output[position] = value;
+
+        array = state.output.slice();
+
+        noteElement.textContent =
+          `output[${position}] = ${value}`;
+
+        state.outputIndex -= 1;
+
+        draw();
+        return;
+      }
+
+      finish("Counting sort 완료");
+    }
+
+    function cocktailStep() {
+      if (state.left >= state.right) {
+        finish("Cocktail shaker sort 완료");
+        return;
+      }
+
+      let swapped = false;
+
+      if (state.phase === "forward") {
+        for (
+          let index = state.left;
+          index < state.right;
+          index++
+        ) {
+          if (
+            array[index] >
+            array[index + 1]
+          ) {
+            [
+              array[index],
+              array[index + 1]
+            ] = [
+              array[index + 1],
+              array[index]
+            ];
+
+            swapped = true;
+          }
+        }
+
+        if (!swapped) {
+          finish(
+            "forward pass에서 교환이 없어 완료"
+          );
+          return;
+        }
+
+        state.right -= 1;
+        state.phase = "backward";
+
+        noteElement.textContent =
+          "왼쪽 → 오른쪽 pass 완료";
+
+        draw();
+        return;
+      }
+
+      swapped = false;
+
+      for (
+        let index = state.right;
+        index > state.left;
+        index--
+      ) {
+        if (
+          array[index - 1] >
+          array[index]
+        ) {
+          [
+            array[index - 1],
+            array[index]
+          ] = [
+            array[index],
+            array[index - 1]
+          ];
+
+          swapped = true;
+        }
+      }
+
+      state.left += 1;
+
+      if (!swapped) {
+        finish(
+          "backward pass에서 교환이 없어 완료"
+        );
+        return;
+      }
+
+      state.phase = "forward";
+
+      noteElement.textContent =
+        "오른쪽 → 왼쪽 pass 완료";
+
+      draw();
+    }
+
+    function step() {
+      if (!state || state.done) {
+        return;
+      }
+
+      if (state.mode === "shell") {
+        shellStep();
+      } else if (state.mode === "counting") {
+        countingStep();
+      } else if (state.mode === "cocktail") {
+        cocktailStep();
+      }
+    }
+  </script>
+</body>
+</html>
