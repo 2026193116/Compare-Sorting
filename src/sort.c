@@ -23,3 +23,6 @@ const SortAlgorithm SORT_ALGORITHMS[] = {
         cocktailShakerSort
     }
 };
+
+const size_t SORT_ALGORITHM_COUNT =
+    sizeof SORT_ALGORITHMS / sizeof SORT_ALGORITHMS[0];
