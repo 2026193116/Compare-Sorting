@@ -170,23 +170,61 @@ int main(int argc, char **argv) {
     }
 
     if (csv || blocks) {
-        printf("algorithm,input,n,comparisons,moves,time_ms,valid\n");
-    } else {
-        printf("=== sorting comparison ===\n");
-        printf("%-20s %-12s %8s %12s %12s %10s %s\n",
-               "algorithm", "input", "n", "comparisons", "moves", "time(ms)", "valid");
+    printf(
+        "algorithm,input,n,comparisons,moves,time_ms,valid\n"
+    );
+} else {
+    printf("=== sorting comparison ===\n");
+    printf(
+        "%-20s %-12s %8s %12s %12s %10s %s\n",
+        "algorithm",
+        "input",
+        "n",
+        "comparisons",
+        "moves",
+        "time(ms)",
+        "valid"
+    );
+}
+
+    /* Normal input cases. */
+    if (!blocks) {
+        for (size_t kind = 0;
+             kind < sizeof SPECS / sizeof SPECS[0];
+             ++kind) {
+
+            if (!run_case(&SPECS[kind], kind, csv)) {
+                return 1;
+            }
+        }
     }
 
+    /* Scale experiment. */
     if (blocks) {
-        static const size_t block_sizes[] = {128, 256, 512, 1024, 2048};
-        for (size_t b = 0; b < sizeof block_sizes / sizeof block_sizes[0]; ++b) {
-            InputSpec block = {"block", block_sizes[b]};
-            if (!run_case(&block, 0, 1)) return 1;
-        }
-    } else {
-        for (size_t kind = 0; kind < sizeof SPECS / sizeof SPECS[0]; ++kind) {
-            if (!run_case(&SPECS[kind], kind, csv)) return 1;
+        static const size_t block_sizes[] = {
+            128,
+            256,
+            512,
+            1024,
+            2048
+        };
+
+        for (size_t b = 0;
+             b < sizeof block_sizes / sizeof block_sizes[0];
+             ++b) {
+
+            InputSpec block = {
+                "block",
+                block_sizes[b]
+            };
+
+            if (!run_case(&block, 0, 1)) {
+                return 1;
+            }
         }
     }
+
     return 0;
+}
+    
 }
