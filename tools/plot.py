@@ -92,34 +92,69 @@ def grouped(rows, metric, groups):
 
 def main():
     rows = read_rows()
+
     os.makedirs("report", exist_ok=True)
-    write_svg("report/complexity.svg", "Theoretical growth (conceptual)", "relative cost", {"shellSort": [("n", 2), ("n²", 5)], "countingSort": [("n", 1), ("n+k", 2)], "cocktailShakerSort": [("n", 1), ("n²", 6)]}, ["small", "large"])
-    write_svg("report/input-time.svg", "Execution time by input order", "time (ms)", grouped(rows, "time_ms", INPUTS), INPUTS)
-    write_svg("report/input-comparisons.svg", "Comparisons by input order", "comparisons", grouped(rows, "comparisons", INPUTS), INPUTS)
-    write_svg("report/input-moves.svg", "Moves by input order", "moves", grouped(rows, "moves", INPUTS), INPUTS)
+
+    write_svg(
+        "report/complexity.svg",
+        "Theoretical growth (conceptual)",
+        "relative cost",
+        {
+            "shellSort": [("n", 2), ("n²", 5)],
+            "countingSort": [("n", 1), ("n+k", 2)],
+            "cocktailShakerSort": [("n", 1), ("n²", 6)]
+        },
+        ["small", "large"]
+    )
+
+    write_svg(
+        "report/input-time.svg",
+        "Execution time by input order",
+        "time (ms)",
+        grouped(rows, "time_ms", INPUTS),
+        INPUTS
+    )
+
+    write_svg(
+        "report/input-comparisons.svg",
+        "Comparisons by input order",
+        "comparisons",
+        grouped(rows, "comparisons", INPUTS),
+        INPUTS
+    )
+
+    write_svg(
+        "report/input-moves.svg",
+        "Moves by input order",
+        "moves",
+        grouped(rows, "moves", INPUTS),
+        INPUTS
+    )
+
     block_rows = [
-    row
-    for row in rows
-    if row["input"] == "block"
-]
+        row
+        for row in rows
+        if row["input"] == "block"
+    ]
 
-if not block_rows:
-    raise SystemExit(
-        "No block data found. "
-        "Run: make charts"
+    if not block_rows:
+        raise SystemExit(
+            "No block data found. "
+            "Run: make charts"
+        )
+
+    sizes = sorted(
+        {
+            int(row["n"])
+            for row in block_rows
+        }
     )
 
-sizes = sorted(
-    {
-        int(row["n"])
-        for row in block_rows
-    }
-)
+    if sizes != [128, 256, 512, 1024, 2048]:
+        raise SystemExit(
+            f"Unexpected block sizes: {sizes}"
+        )
 
-if sizes != [128, 256, 512, 1024, 2048]:
-    raise SystemExit(
-        f"Unexpected block sizes: {sizes}"
-    )
 
 if __name__ == "__main__":
     main()

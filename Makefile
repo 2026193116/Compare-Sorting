@@ -23,7 +23,8 @@ test-py:
 
 charts: src/main.out
 	@mkdir -p report
-	@./src/main.out --csv --blocks > report/results.csv
+	@./src/main.out --csv > report/results.csv
+	@./src/main.out --blocks --csv | tail -n +2 >> report/results.csv
 	@python3 tools/plot.py
 
 debug: src/main.debug.out
