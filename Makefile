@@ -3,13 +3,16 @@ CFLAGS ?= -std=c17 -Wall -Wextra -O2
 DEBUGFLAGS ?= -std=c17 -Wall -Wextra -g -O0
 
 SORT_SRC = src/sort.c src/shellSort.c src/countingSort.c src/cocktailShakerSort.c
-.PHONY: all run test test-c charts clean debug
+.PHONY: all run test test-c test-py charts clean debug
 
 all: test
 run: src/main.out
 	@./src/main.out
 test: tests/test_sort.out
+	@echo "Running C tests..."
 	@./tests/test_sort.out
+	@echo "Running Python tests..."
+	@cd src && python3 ../tests/test_sort.py
 charts: src/main.out
 	@./src/main.out --csv > report/results.csv
 	@python3 tools/plot.py
