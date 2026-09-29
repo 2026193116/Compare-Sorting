@@ -17,11 +17,26 @@ static const InputSpec SPECS[] = {
     {"duplicates", 2000}
 };
 
-static int is_sorted(const int values[], size_t n) {
-    for (size_t i = 1; i < n; ++i) {
-        if (values[i - 1] > values[i]) return 0;
+static int same_array(
+    const int lhs[],
+    const int rhs[],
+    size_t n
+) {
+    for (size_t i = 0; i < n; ++i) {
+        if (lhs[i] != rhs[i]) {
+            return 0;
+        }
     }
     return 1;
+}
+
+static int compare_ints(const void *lhs, const void *rhs) {
+    const int a = *(const int *)lhs;
+    const int b = *(const int *)rhs;
+
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
 }
 
 static void make_input(int values[], size_t n, size_t kind) {
@@ -56,29 +71,89 @@ static void print_result(const char *algorithm, const char *input,
     }
 }
 
-static int run_case(const InputSpec *spec, size_t kind, int csv) {
+static int run_case(
+    const InputSpec *spec,
+    size_t kind,
+    int csv
+) {
     int *input = malloc(spec->size * sizeof *input);
     int *work = malloc(spec->size * sizeof *work);
-    if (!input || !work) {
+    int *expected = malloc(spec->size * sizeof *expected);
+
+    if (!input || !work || !expected) {
         free(input);
         free(work);
+        free(expected);
         return 0;
     }
 
     make_input(input, spec->size, kind);
-    for (size_t algorithm = 0; algorithm < SORT_ALGORITHM_COUNT; ++algorithm) {
-        memcpy(work, input, spec->size * sizeof *work);
+
+    memcpy(
+        expected,
+        input,
+        spec->size * sizeof *expected
+    );
+
+    /*
+     * Build the expected result before timing the
+     * individual sorting algorithms.
+     */
+    qsort(
+        expected,
+        spec->size,
+        sizeof *expected,
+        compare_ints
+    );
+
+    for (size_t algorithm = 0;
+         algorithm < SORT_ALGORITHM_COUNT;
+         ++algorithm) {
+
+        memcpy(
+            work,
+            input,
+            spec->size * sizeof *work
+        );
+
         SortStats stats = {0, 0};
+
         clock_t start = clock();
-        SORT_ALGORITHMS[algorithm].sort(work, spec->size, &stats);
+
+        SORT_ALGORITHMS[algorithm].sort(
+            work,
+            spec->size,
+            &stats
+        );
+
         clock_t end = clock();
-        double ms = 1000.0 * (double)(end - start) / (double)CLOCKS_PER_SEC;
-        print_result(SORT_ALGORITHMS[algorithm].name, spec->name, spec->size,
-                     &stats, ms, csv, is_sorted(work, spec->size));
+
+        double ms =
+            1000.0 *
+            (double)(end - start) /
+            (double)CLOCKS_PER_SEC;
+
+        int valid = same_array(
+            work,
+            expected,
+            spec->size
+        );
+
+        print_result(
+            SORT_ALGORITHMS[algorithm].name,
+            spec->name,
+            spec->size,
+            &stats,
+            ms,
+            csv,
+            valid
+        );
     }
 
     free(input);
     free(work);
+    free(expected);
+
     return 1;
 }
 
