@@ -1,3 +1,5 @@
+#include "sort.h"
+
 const SortAlgorithm SORT_ALGORITHMS[] = {
     {
         "shellSort",
