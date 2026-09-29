@@ -55,11 +55,38 @@ def write_svg(path, title, ylabel, series, x_labels):
 
 def grouped(rows, metric, groups):
     result = {}
+
     for algorithm in COLORS:
         result[algorithm] = []
+
         for group in groups:
-            matches = [r for r in rows if r["algorithm"] == algorithm and r["input"] == group]
-            result[algorithm].append((group, sum(float(r[metric]) for r in matches) / max(len(matches), 1)))
+            matches = [
+                row
+                for row in rows
+                if (
+                    row["algorithm"] == algorithm
+                    and row["input"] == group
+                )
+            ]
+
+            if not matches:
+                raise ValueError(
+                    f"Missing data: "
+                    f"algorithm={algorithm}, input={group}"
+                )
+
+            values = [
+                float(row[metric])
+                for row in matches
+            ]
+
+            result[algorithm].append(
+                (
+                    group,
+                    sum(values) / len(values)
+                )
+            )
+
     return result
 
 
@@ -70,11 +97,29 @@ def main():
     write_svg("report/input-time.svg", "Execution time by input order", "time (ms)", grouped(rows, "time_ms", INPUTS), INPUTS)
     write_svg("report/input-comparisons.svg", "Comparisons by input order", "comparisons", grouped(rows, "comparisons", INPUTS), INPUTS)
     write_svg("report/input-moves.svg", "Moves by input order", "moves", grouped(rows, "moves", INPUTS), INPUTS)
-    block_rows = [r for r in rows if r["input"] == "block"]
-    sizes = sorted({int(r["n"]) for r in block_rows})
-    series = {algorithm: [(str(n), sum(float(r["time_ms"]) for r in block_rows if r["algorithm"] == algorithm and int(r["n"]) == n) / max(len([r for r in block_rows if r["algorithm"] == algorithm and int(r["n"]) == n]), 1)) for n in sizes] for algorithm in COLORS}
-    write_svg("report/scale-time.svg", "Execution time as n grows", "time (ms)", series, sizes)
+    block_rows = [
+    row
+    for row in rows
+    if row["input"] == "block"
+]
 
+if not block_rows:
+    raise SystemExit(
+        "No block data found. "
+        "Run: make charts"
+    )
+
+sizes = sorted(
+    {
+        int(row["n"])
+        for row in block_rows
+    }
+)
+
+if sizes != [128, 256, 512, 1024, 2048]:
+    raise SystemExit(
+        f"Unexpected block sizes: {sizes}"
+    )
 
 if __name__ == "__main__":
     main()
