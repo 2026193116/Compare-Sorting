@@ -21,17 +21,14 @@
 
 입력 생성 방식, 시간 측정 방식, 통계 집계 방식이 조금만 달라도 결과가 서로 다르게 보이기 때문에 세 알고리즘을 각각 따로 구현하는 것만으로는 공정한 비교가 어렵다. 그래서 본 실험은 가능한 한 모든 구현이 같은 입력, 같은 측정 포인트, 같은 출력 규칙을 따라 동작하도록 설계되었다.
 
-C 구현에서는 `SortFunction` 함수 포인터와 `SortStats` 구조체를 사용해 각 알고리즘을 공통 기준으로 호출한다. 함수가 받는 인자는 정렬 대상 배열, 배열 길이, 통계 구조체 포인이기 때문에, 이를 통해 비교 횟수, 이동 횟수, 실행 시간을 동일한 기준으로 누적할 수 있다.
+C 구현에서는 `SortStats` 구조체를 이용해 비교 횟수와 이동 횟수를 알고리즘 내부에서 누적하고, 실행 시간은 `main.c`에서 알고리즘
+호출 전후를 측정하여 별도로 기록하였다.
 
 ```c
-/* 개념적인 인터페이스 예시 */
-typedef struct SortStats {
-    long long comparisons;
-    long long moves;
-    double elapsed_ms;
+typedef struct {
+    unsigned long long comparisons;
+    unsigned long long moves;
 } SortStats;
-
-typedef void (*SortFunction)(int *arr, int n, SortStats *stats);
 ```
 
 이 구조는 대부분의 정렬 실험에서 중요한 점을 보장한다.
@@ -260,19 +257,28 @@ def shell_sort(values):
 #### C언어 구현 관점의 설명
 
 ```c
-int max = findMax(arr, n);
-int *count = calloc(max + 1, sizeof(int));
+int min = arr[0];
+int max = arr[0];
 
-for (i = 0; i < n; i++) {
-    count[arr[i]]++;
+for (size_t i = 1; i < n; ++i) {
+    if (arr[i] < min) min = arr[i];
+    if (arr[i] > max) max = arr[i];
 }
 
-for (i = 1; i <= max; i++) {
+size_t range = (size_t)((long long)max - min + 1);
+size_t *count = calloc(range, sizeof *count);
+int *output = malloc(n * sizeof *output);
+
+for (i = 0; i < n; i++) {
+    count[(size_t)((long long)arr[i] - min)]++;
+}
+
+for (i = 1; i < range; i++) {
     count[i] += count[i - 1];
 }
 
 for (i = n - 1; i >= 0; i--) {
-    output[--count[arr[i]]] = arr[i];
+     output[--count[(size_t)((long long)arr[i] - min)]] = arr[i];
 }
 ```
 
@@ -426,11 +432,14 @@ def cocktail_shaker_sort(values):
 
 ### 4.1 통계 누적의 중요성
 
-정렬 알고리즘을 비교할 때 가장 중요한 것은 “어떤 기준으로 측정하느냐”이다. 비교 횟수, 이동 횟수, 시간 측정을 모두 분리해 기록하고, 이를 Python과 C 구현에 동일하게 적용하였다.
+정렬 알고리즘을 비교할 때 가장 중요한 것은 “어떤 기준으로 측정하느냐”이다. 비교 횟수, 이동 횟수, 시간 측정을 모두 분리해 기록하고, 이를 Python과 C 구현에 동일하게 적용하였다. 비교 횟수와 이동 횟수는 각 C 구현의 명시적인 카운터를 기준으로 계산하였다.
 
-- 비교 횟수: 두 원소를 서로 비교한 횟수
-- 이동 횟수: 원소가 한 칸 이동하거나 교환되는 횟수
-- 실행 시간: 정렬 알고리즘 자체의 수행 시간
+- 비교 횟수: 해당 구현에서 `comparisons` 카운터가 증가하는 원소 비교의 횟수
+- 이동 횟수: 해당 구현에서 `moves` 카운터가 증가하는 배열 대입 또는 교환 작업의 횟수
+- 실행 시간: 정렬 함수 호출 구간에서 측정한 수행 시간
+
+알고리즘마다 내부 자료구조와 연산 방식이 다르기 때문에 `moves`는 모든 알고리즘에서 동일한 물리적 연산량을 의미하지 않으므로, 이동 횟수는 각 구현의 작업량을 해석하는 보조 지표로만 사용하고자 한다. 또한, 현재 Counting sort에서는 최소값과 최대값을 찾는 비교는
+`comparisons` 카운터에 포함하지 않고, 정렬 단계의 비교 횟수를 기록하는 방식으로 구현하였다.
 
 이 값들은 서로 독립적으로 변화한다. 예를 들어 버블 정렬은 비교 횟수는 비슷해도, 교환이 많아지면 이동 횟수가 급격히 증가한다. 반대로 카운팅 정렬은 비교보다 누적 구조와 배치가 핵심이 되어, 입력 범위가 작을 때는 매우 빠르게 동작한다.
 
