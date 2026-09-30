@@ -43,6 +43,7 @@ static void make_input(int values[], size_t n, size_t kind) {
     for (size_t i = 0; i < n; ++i) {
         switch (kind) {
             case 0:
+                /* Deterministic pseudo-random-like sequence. */
                 values[i] = (int)((i * 73U + 19U) % 1000U) - 500;
                 break;
             case 1:
@@ -58,16 +59,37 @@ static void make_input(int values[], size_t n, size_t kind) {
     }
 }
 
-static void print_result(const char *algorithm, const char *input,
-                         size_t n, const SortStats *stats, double ms,
-                         int csv, int valid) {
+static void print_result(
+    const char *algorithm,
+    const char *input,
+    size_t n,
+    const SortStats *stats,
+    double ms,
+    int csv,
+    int valid
+) {
     if (csv) {
-        printf("%s,%s,%zu,%llu,%llu,%.3f,%s\n", algorithm, input, n,
-               stats->comparisons, stats->moves, ms, valid ? "true" : "false");
+        printf(
+            "%s,%s,%zu,%llu,%llu,%.3f,%s\n",
+            algorithm,
+            input,
+            n,
+            stats->comparisons,
+            stats->moves,
+            ms,
+            valid ? "true" : "false"
+        );
     } else {
-        printf("%-20s %-12s %8zu %12llu %12llu %10.3f %s\n",
-               algorithm, input, n, stats->comparisons, stats->moves, ms,
-               valid ? "yes" : "NO");
+        printf(
+            "%-20s %-12s %8zu %12llu %12llu %10.3f %s\n",
+            algorithm,
+            input,
+            n,
+            stats->comparisons,
+            stats->moves,
+            ms,
+            valid ? "yes" : "NO"
+        );
     }
 }
 
@@ -106,6 +128,8 @@ static int run_case(
         compare_ints
     );
 
+    int all_valid = 1;
+
     for (size_t algorithm = 0;
          algorithm < SORT_ALGORITHM_COUNT;
          ++algorithm) {
@@ -139,6 +163,10 @@ static int run_case(
             spec->size
         );
 
+        if (!valid) {
+            all_valid = 0;
+        }
+
         print_result(
             SORT_ALGORITHMS[algorithm].name,
             spec->name,
@@ -154,38 +182,45 @@ static int run_case(
     free(work);
     free(expected);
 
-    return 1;
+    return all_valid;
 }
 
 int main(int argc, char **argv) {
     int csv = 0;
     int blocks = 0;
+
     for (int i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], "--csv") == 0) csv = 1;
-        else if (strcmp(argv[i], "--blocks") == 0) blocks = 1;
-        else {
-            fprintf(stderr, "usage: %s [--csv] [--blocks]\n", argv[0]);
+        if (strcmp(argv[i], "--csv") == 0) {
+            csv = 1;
+        } else if (strcmp(argv[i], "--blocks") == 0) {
+            blocks = 1;
+        } else {
+            fprintf(
+                stderr,
+                "usage: %s [--csv] [--blocks]\n",
+                argv[0]
+            );
             return 2;
         }
     }
 
     if (csv || blocks) {
-    printf(
-        "algorithm,input,n,comparisons,moves,time_ms,valid\n"
-    );
-} else {
-    printf("=== sorting comparison ===\n");
-    printf(
-        "%-20s %-12s %8s %12s %12s %10s %s\n",
-        "algorithm",
-        "input",
-        "n",
-        "comparisons",
-        "moves",
-        "time(ms)",
-        "valid"
-    );
-}
+        printf(
+            "algorithm,input,n,comparisons,moves,time_ms,valid\n"
+        );
+    } else {
+        printf("=== sorting comparison ===\n");
+        printf(
+            "%-20s %-12s %8s %12s %12s %10s %s\n",
+            "algorithm",
+            "input",
+            "n",
+            "comparisons",
+            "moves",
+            "time(ms)",
+            "valid"
+        );
+    }
 
     /* Normal input cases. */
     if (!blocks) {
@@ -199,7 +234,11 @@ int main(int argc, char **argv) {
         }
     }
 
-    /* Scale experiment. */
+    /*
+     * Scale experiment.
+     * The historical CLI name --blocks is kept so existing
+     * Makefile/report data remains compatible.
+     */
     if (blocks) {
         static const size_t block_sizes[] = {
             128,
