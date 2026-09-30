@@ -492,6 +492,7 @@ void countingSort(int a[], size_t n, SortStats *s) {
     free(count); free(output);
 }
 ```
+![카운팅 정렬의 빈도 계산, 누적합 및 출력 배치](./counting-sort-flow.svg
 
 **진행 방식:**
 
@@ -624,7 +625,7 @@ void cocktailShakerSort(int a[], size_t n, SortStats *s) {
     }
 }
 ```
-
+![칵테일 셰이커 정렬의 양방향 순회와 조기 종료](./cocktail-shaker-sort-flow.svg)
 **진행 방식:**
 
 1. 왼쪽 포인터(`left`)와 오른쪽 포인터(`right`)를 설정합니다.
