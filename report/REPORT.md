@@ -26,7 +26,7 @@
 입력 생성 방식, 시간 측정 방식, 통계 집계 방식이 조금만 달라도 결과가 서로 다르게 보이기 때문에 세 알고리즘을 각각 따로 구현하는 것만으로는 공정한 비교가 불가능합니다. 이번 과제에서는 정렬 함수 내부에서 각 구현에서 정의한 측정 기준에 따라 비교 횟수와 이동 횟수를 SortStats에 누적하고, 실행 시간은 입력 복사와 정답 생성 등의 과정은 제외하고, main.c와 main.py에서 실제 정렬 함수가 호출되는 구간만 측정하였습니다.
 
 ```c
-/* C: sortctx.h에서 정의 */
+// C언어 : sortctx.h에서 정
 typedef struct {
     unsigned long long comparisons;
     unsigned long long moves;
