@@ -1,297 +1,338 @@
-
-<!-- ========================================================= -->
-<!-- SWAP -->
-<!-- ========================================================= -->
-
-<rect class="step"
-      x="830"
-      y="665"
-      width="260"
-      height="64"
-      rx="10"/>
-
-<text x="960"
-      y="693"
-      text-anchor="middle">
-    swap
-</text>
-
-<text x="960"
-      y="715"
-      text-anchor="middle">
-    moves += 3
-</text>
-
-<path class="arrow"
-      d="M830 697 H760 V665 H320"/>
-
-
-<!-- ========================================================= -->
-<!-- FORWARD FINISHED -> SWAPPED CHECK -->
-<!-- ========================================================= -->
-
-<rect class="decision"
-      x="20"
-      y="570"
-      width="290"
-      height="64"
-      rx="10"/>
-
-<text x="165"
-      y="608"
-      text-anchor="middle">
-    swapped == false ?
-</text>
-
-
-<!-- forward false -> END -->
-<path class="arrow"
-      d="M20 602 H5 V830 H155"/>
-
-<text x="72"
-      y="590">
-    예
-</text>
-
-<rect class="end"
-      x="30"
-      y="830"
-      width="250"
-      height="60"
-      rx="10"/>
-
-<text x="155"
-      y="866"
-      text-anchor="middle">
-    정렬 완료 → 종료
-</text>
-
-
-<!-- forward true -> right-- -->
-<path class="arrow"
-      d="M310 602 H350 V790 H450"/>
-
-<text x="345"
-      y="585">
-    아니오
-</text>
-
-
-<!-- ========================================================= -->
-<!-- RIGHT-- -->
-<!-- ========================================================= -->
-
-<rect class="step"
-      x="450"
-      y="760"
-      width="180"
-      height="58"
-      rx="10"/>
-
-<text x="540"
-      y="795"
-      text-anchor="middle">
-    right--
-</text>
-
-<path class="arrow"
-      d="M630 789 H680"/>
-
-
-<!-- ========================================================= -->
-<!-- RESET SWAPPED -->
-<!-- ========================================================= -->
-
-<rect class="step"
-      x="680"
-      y="760"
-      width="230"
-      height="58"
-      rx="10"/>
-
-<text x="795"
-      y="795"
-      text-anchor="middle">
-    swapped = false
-</text>
-
-<path class="arrow"
-      d="M795 818 V850"/>
-
-
-<!-- ========================================================= -->
-<!-- BACKWARD LOOP INIT -->
-<!-- ========================================================= -->
-
-<rect class="step"
-      x="680"
-      y="850"
-      width="230"
-      height="58"
-      rx="10"/>
-
-<text x="795"
-      y="885"
-      text-anchor="middle">
-    index = right
-</text>
-
-<!-- ========================================================= -->
-<!-- BACKWARD LOOP CONDITION -->
-<!-- ========================================================= -->
-
-<path class="arrow"
-      d="M680 879 H600 V930"/>
-
-<rect class="decision"
-      x="430"
-      y="930"
-      width="340"
-      height="64"
-      rx="10"/>
-
-<text x="600"
-      y="968"
-      text-anchor="middle">
-    index &gt; left ?
-</text>
-
-
-<!-- ========================================================= -->
-<!-- BACKWARD COMPARISON -->
-<!-- ========================================================= -->
-
-<!-- This section is intentionally placed beyond the main -->
-<!-- flow to keep the major flow readable. -->
-
-<path class="arrow"
-      d="M770 962 H1040 V525"/>
-
-<text x="850"
-      y="950"
-      text-anchor="middle">
-    예
-</text>
-
-<rect class="decision"
-      x="880"
-      y="445"
-      width="230"
-      height="64"
-      rx="10"/>
-
-<text x="995"
-      y="473"
-      text-anchor="middle">
-    result[index - 1]
-</text>
-
-<text x="995"
-      y="495"
-      text-anchor="middle">
-    &gt; result[index] ?
-</text>
-
-
-<!-- backward comparison -> swap -->
-<path class="arrow"
-      d="M880 477 H820 V410"/>
-
-<text x="850"
-      y="465">
-    예
-</text>
-
-
-<rect class="step"
-      x="690"
-      y="350"
-      width="230"
-      height="60"
-      rx="10"/>
-
-<text x="805"
-      y="378"
-      text-anchor="middle">
-    swap
-</text>
-
-<text x="805"
-      y="400"
-      text-anchor="middle">
-    moves += 3
-</text>
-
-
-<!-- backward comparison no -> index-- -->
-<path class="arrow"
-      d="M1110 477 H1140 V350 H960"/>
-
-<text x="1115"
-      y="465">
-    아니오
-</text>
-
-
-<rect class="step"
-      x="950"
-      y="300"
-      width="150"
-      height="58"
-      rx="10"/>
-
-<text x="1025"
-      y="335"
-      text-anchor="middle">
-    index--
-</text>
-
-
-<!-- backward swap -> index-- -->
-<path class="arrow"
-      d="M805 350 V330 H950"/>
-
-
-<!-- index-- -> backward condition -->
-<path class="arrow"
-      d="M950 358 V962 H770"/>
-
-
-<!-- ========================================================= -->
-<!-- BACKWARD LOOP FINISHED -> left++ -->
-<!-- ========================================================= -->
-
-<path class="arrow"
-      d="M430 962 H360 V920"/>
-
-<text x="390"
-      y="950">
-    아니오
-</text>
-
-<rect class="step"
-      x="240"
-      y="850"
-      width="180"
-      height="58"
-      rx="10"/>
-
-<text x="330"
-      y="885"
-      text-anchor="middle">
-    left++
-</text>
-
-
-<!-- left++ -> while condition -->
-<path class="arrow"
-      d="M240 879 H120 V192 H435"/>
-
-<text class="note"
-      x="145"
-      y="840">
-    다음 왕복
-</text>
-
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200"
+     height="1740"
+     viewBox="0 0 1200 1740">
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10"
+            refX="9" refY="3" orient="auto"
+            markerUnits="strokeWidth">
+      <path d="M0,0 L10,3 L0,6 Z" fill="#333"/>
+    </marker>
+
+    <marker id="arrowBlue" markerWidth="10" markerHeight="10"
+            refX="9" refY="3" orient="auto"
+            markerUnits="strokeWidth">
+      <path d="M0,0 L10,3 L0,6 Z" fill="#2563eb"/>
+    </marker>
+
+    <marker id="arrowRed" markerWidth="10" markerHeight="10"
+            refX="9" refY="3" orient="auto"
+            markerUnits="strokeWidth">
+      <path d="M0,0 L10,3 L0,6 Z" fill="#dc2626"/>
+    </marker>
+
+    <style>
+      .title {
+        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+        font-size: 32px;
+        font-weight: 700;
+        fill: #111827;
+      }
+
+      .subtitle {
+        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+        font-size: 17px;
+        fill: #6b7280;
+      }
+
+      .box {
+        fill: #ffffff;
+        stroke: #374151;
+        stroke-width: 2;
+      }
+
+      .init {
+        fill: #f3f4f6;
+        stroke: #4b5563;
+        stroke-width: 2;
+      }
+
+      .forward {
+        fill: #eff6ff;
+        stroke: #2563eb;
+        stroke-width: 2.5;
+      }
+
+      .backward {
+        fill: #fef2f2;
+        stroke: #dc2626;
+        stroke-width: 2.5;
+      }
+
+      .decision {
+        fill: #fffbeb;
+        stroke: #d97706;
+        stroke-width: 2;
+      }
+
+      .finish {
+        fill: #f3f4f6;
+        stroke: #374151;
+        stroke-width: 2;
+      }
+
+      .text {
+        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+        font-size: 19px;
+        fill: #111827;
+        text-anchor: middle;
+      }
+
+      .small {
+        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+        font-size: 16px;
+        fill: #4b5563;
+        text-anchor: middle;
+      }
+
+      .decisionText {
+        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        fill: #92400e;
+        text-anchor: middle;
+      }
+
+      .passLabel {
+        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        text-anchor: middle;
+      }
+
+      .blueText {
+        fill: #1d4ed8;
+      }
+
+      .redText {
+        fill: #b91c1c;
+      }
+
+      .arrow {
+        stroke: #333;
+        stroke-width: 2.5;
+        fill: none;
+        marker-end: url(#arrow);
+      }
+
+      .arrowBlue {
+        stroke: #2563eb;
+        stroke-width: 2.5;
+        fill: none;
+        marker-end: url(#arrowBlue);
+      }
+
+      .arrowRed {
+        stroke: #dc2626;
+        stroke-width: 2.5;
+        fill: none;
+        marker-end: url(#arrowRed);
+      }
+
+      .label {
+        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        fill: #374151;
+      }
+
+      .loop {
+        stroke: #6b7280;
+        stroke-width: 2;
+        fill: none;
+        stroke-dasharray: 7 5;
+        marker-end: url(#arrow);
+      }
+
+      .sideNote {
+        fill: #fafafa;
+        stroke: #d1d5db;
+        stroke-width: 1.5;
+      }
+
+      .noteText {
+        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+        font-size: 15px;
+        fill: #4b5563;
+      }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="1200" height="1740" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="600" y="55" class="title" text-anchor="middle">
+    Cocktail Shaker Sort 구조도
+  </text>
+
+  <text x="600" y="87" class="subtitle" text-anchor="middle">
+    양방향 순회를 이용하여 큰 값과 작은 값을 번갈아 확정하는 정렬 알고리즘
+  </text>
+
+  <!-- Start -->
+  <rect x="430" y="125" width="340" height="70" rx="35" class="init"/>
+  <text x="600" y="155" class="text">입력 배열 values</text>
+  <text x="600" y="181" class="small">n개의 원소</text>
+
+  <path d="M600 195 L600 235" class="arrow"/>
+
+  <!-- Initialization -->
+  <rect x="360" y="235" width="480" height="105" rx="12" class="init"/>
+  <text x="600" y="268" class="text">정렬 범위 초기화</text>
+  <text x="600" y="299" class="small">left = 0</text>
+  <text x="600" y="325" class="small">right = n - 1</text>
+
+  <path d="M600 340 L600 390" class="arrow"/>
+
+  <!-- Outer loop -->
+  <polygon points="600,390 790,450 600,510 410,450"
+           class="decision"/>
+  <text x="600" y="445" class="decisionText">정렬할 범위가</text>
+  <text x="600" y="470" class="decisionText">남아 있는가?</text>
+
+  <!-- No -> finish -->
+  <path d="M790 450 L965 450 L965 1550 L770 1550"
+        class="arrow"/>
+  <text x="840" y="432" class="label">아니오</text>
+
+  <!-- Yes downward -->
+  <path d="M600 510 L600 555" class="arrow"/>
+  <text x="620" y="538" class="label">예</text>
+
+  <!-- Reset swapped -->
+  <rect x="400" y="555" width="400" height="70" rx="10" class="box"/>
+  <text x="600" y="598" class="text">swapped = false</text>
+
+  <path d="M600 625 L600 675" class="arrow"/>
+
+  <!-- Forward pass -->
+  <rect x="300" y="675" width="600" height="125" rx="14" class="forward"/>
+  <text x="600" y="710" class="passLabel blueText">
+    FORWARD PASS · 왼쪽 → 오른쪽
+  </text>
+  <text x="600" y="743" class="text">
+    result[index] &gt; result[index + 1] 비교
+  </text>
+  <text x="600" y="773" class="small">
+    큰 값을 오른쪽으로 이동 · swap 시 moves += 3
+  </text>
+
+  <path d="M600 800 L600 850" class="arrow"/>
+
+  <!-- Forward swapped decision -->
+  <polygon points="600,850 790,910 600,970 410,910"
+           class="decision"/>
+  <text x="600" y="905" class="decisionText">Forward pass에서</text>
+  <text x="600" y="930" class="decisionText">swap이 발생했는가?</text>
+
+  <!-- No forward -> finish -->
+  <path d="M410 910 L210 910 L210 1550 L430 1550"
+        class="arrow"/>
+  <text x="300" y="892" class="label">아니오</text>
+
+  <!-- Yes forward -->
+  <path d="M600 970 L600 1020" class="arrow"/>
+  <text x="620" y="998" class="label">예</text>
+
+  <!-- right decrement -->
+  <rect x="400" y="1020" width="400" height="70" rx="10" class="forward"/>
+  <text x="600" y="1063" class="text">right -= 1</text>
+
+  <path d="M600 1090 L600 1135" class="arrow"/>
+
+  <!-- Backward pass -->
+  <rect x="300" y="1135" width="600" height="125" rx="14" class="backward"/>
+  <text x="600" y="1170" class="passLabel redText">
+    BACKWARD PASS · 오른쪽 → 왼쪽
+  </text>
+  <text x="600" y="1203" class="text">
+    result[index - 1] &gt; result[index] 비교
+  </text>
+  <text x="600" y="1233" class="small">
+    작은 값을 왼쪽으로 이동 · swap 시 moves += 3
+  </text>
+
+  <path d="M600 1260 L600 1310" class="arrow"/>
+
+  <!-- Backward swapped decision -->
+  <polygon points="600,1310 790,1370 600,1430 410,1370"
+           class="decision"/>
+  <text x="600" y="1365" class="decisionText">Backward pass에서</text>
+  <text x="600" y="1390" class="decisionText">swap이 발생했는가?</text>
+
+  <!-- No backward -> finish -->
+  <path d="M790 1370 L1040 1370 L1040 1550 L770 1550"
+        class="arrow"/>
+  <text x="875" y="1352" class="label">아니오</text>
+
+  <!-- Yes backward -->
+  <path d="M600 1430 L600 1470" class="arrow"/>
+  <text x="620" y="1455" class="label">예</text>
+
+  <!-- left increment -->
+  <rect x="400" y="1470" width="400" height="70" rx="10" class="backward"/>
+  <text x="600" y="1513" class="text">left += 1</text>
+
+  <!-- Loop back -->
+  <path d="M400 1505 L300 1505 L300 450 L410 450"
+        class="loop"/>
+  <text x="245" y="820" class="label">다음 양방향 순회</text>
+
+  <!-- Finish -->
+  <rect x="430" y="1550" width="340" height="75" rx="37" class="finish"/>
+  <text x="600" y="1582" class="text">정렬 완료</text>
+  <text x="600" y="1608" class="small">result 반환</text>
+
+  <!-- Side explanation boxes -->
+
+  <!-- Left note -->
+  <rect x="35" y="1025" width="240" height="205" rx="12" class="sideNote"/>
+  <text x="155" y="1055" class="label" text-anchor="middle">
+    Forward Pass의 역할
+  </text>
+  <text x="55" y="1090" class="noteText">
+    • 왼쪽에서 오른쪽으로 탐색
+  </text>
+  <text x="55" y="1118" class="noteText">
+    • 인접 원소를 비교
+  </text>
+  <text x="55" y="1146" class="noteText">
+    • 큰 값을 오른쪽으로 이동
+  </text>
+  <text x="55" y="1174" class="noteText">
+    • 최대값이 right에 확정
+  </text>
+  <text x="55" y="1202" class="noteText">
+    • right를 1 감소
+  </text>
+
+  <!-- Right note -->
+  <rect x="925" y="1025" width="240" height="205" rx="12" class="sideNote"/>
+  <text x="1045" y="1055" class="label" text-anchor="middle">
+    Backward Pass의 역할
+  </text>
+  <text x="945" y="1090" class="noteText">
+    • 오른쪽에서 왼쪽으로 탐색
+  </text>
+  <text x="945" y="1118" class="noteText">
+    • 인접 원소를 비교
+  </text>
+  <text x="945" y="1146" class="noteText">
+    • 작은 값을 왼쪽으로 이동
+  </text>
+  <text x="945" y="1174" class="noteText">
+    • 최소값이 left에 확정
+  </text>
+  <text x="945" y="1202" class="noteText">
+    • left를 1 증가
+  </text>
+
+  <!-- Complexity / implementation note -->
+  <rect x="100" y="1655" width="1000" height="55" rx="10" class="sideNote"/>
+  <text x="600" y="1689" class="noteText" text-anchor="middle">
+    핵심 구조: Forward Pass에서 최대값을 오른쪽에 확정 → Backward Pass에서 최소값을 왼쪽에 확정 → 정렬 범위를 좁혀 반복
+  </text>
 
 </svg>
