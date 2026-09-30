@@ -762,6 +762,8 @@ for (size_t i = 0; i < n; ++i) {
 
 ### 5.2 실험 결과
 
+(results.csv)
+
 #### 5.2.1 입력 형태에 따른 실행 시간
 
 ![입력 형태별 실행 시간](input-time.svg)
