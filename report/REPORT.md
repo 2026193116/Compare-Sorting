@@ -346,36 +346,10 @@ def main():
 
 #### C언어 구현
 
-```c
-/*
- * Shell sort with a quarter-size initial gap.
- * The gap sequence is floor(n / 4), floor(n / 8), ... , 1.
- */
-void shellSort(int a[], size_t n, SortStats *s) {
-    size_t gap = n / 4;
-    if (gap == 0) gap = 1;
+C 언어로 구현한 셸 정렬은 삽입 정렬을 확장한 방식으로, 배열의 일정한 간격(gap)을 기준으로 원소를 정렬한 뒤 간격을 점차 줄여가며 전체 배열을 정렬합니다. 이 구현에서는 처음 n / 4를 gap으로 설정하고, 각 단계에서 gap을 절반으로 줄여 1이 될 때까지 반복합니다. 각 gap 단계에서는 현재 위치의 값을 저장한 뒤, gap만큼 떨어진 이전 원소와 비교하면서 더 큰 원소를 뒤쪽으로 이동시켜 삽입할 위치를 찾습니다. 마지막으로 gap이 1이 되면 일반적인 삽입 정렬과 같은 방식으로 인접한 원소들을 정렬하면서 전체 배열을 완성하게 됩니다. 정렬 과정에서 실제 비교 횟수와 원소 이동 횟수는 SortStats의 comparisons와 moves에 각각 누적하여 측정하였습니다.
 
-    while (gap > 0) {
-        for (size_t i = gap; i < n; ++i) {
-            int value = a[i];
-            size_t j = i;
-            while (j >= gap) {
-                s->comparisons++;                    /* 비교 카운트 */
-                if (a[j - gap] <= value) break;
-                a[j] = a[j - gap];
-                s->moves++;                          /* 이동 카운트 */
-                j -= gap;
-            }
-            if (j != i) {
-                a[j] = value;
-                s->moves++;                          /* 최종 대입 카운트 */
-            }
-        }
-        gap /= 2;
-    }
-}
-```
 ![셸 정렬의 반복 및 gap 감소 흐름](./shell-sort-flow.svg)
+
 **진행 방식:**
 
 1. `gap = n / 4`에서 시작합니다.
@@ -397,34 +371,7 @@ gap=1 후:   [1, 2, 3, 4, 5, 6, ..., 16]     (1칸씩 = 최종 삽입 정렬)
 
 #### Python 구현
 
-파이썬 버전은 C와 동일한 gap 수열을 사용합니다:
-
-```python
-def shell_sort(values, stats=None, copy_input=True):
-    result = list(values) if copy_input else values
-    if stats is None:
-        stats = SortStats()
-    
-    gap = max(1, len(result) // 4)
-
-    while gap > 0:
-        for index in range(gap, len(result)):
-            value = result[index]
-            j = index
-            while j >= gap:
-                stats.comparisons += 1
-                if result[j - gap] <= value:
-                    break
-                result[j] = result[j - gap]
-                stats.moves += 1
-                j -= gap
-            if j != index:
-                result[j] = value
-                stats.moves += 1
-        gap //= 2
-
-    return result
-```
+Python으로 구현한 셸 정렬은 삽입 정렬을 확장한 방식으로, 일정한 간격(gap)을 두고 떨어진 원소들을 정렬한 후 간격을 점차 줄여 전체 배열을 정렬합니다. 이 구현에서도 n / 4를 초기 gap으로 설정하고, 각 단계마다 gap을 2로 나누어 1이 될 때까지 반복하며, 각 gap 단계에서는 현재 원소를 value에 저장하고, gap만큼 떨어진 이전 원소와 비교하여 더 큰 원소를 뒤쪽으로 이동시킨 후 적절한 위치에 value를 삽입합니다. gap이 1이 되면 일반적인 삽입 정렬과 같은 방식으로 인접한 원소들을 정렬하여 최종적으로 배열을 완성합니다. 정렬 과정에서 발생하는 비교 횟수와 원소 이동 횟수는 SortStats 객체의 comparisons와 moves에 누적하여 측정한다. 또한 copy_input 옵션을 통해 입력 배열의 복사본을 정렬하거나 원본 배열을 직접 수정할 수 있도록 구현하였습니다.
 
 #### 장단점
 
@@ -456,43 +403,8 @@ def shell_sort(values, stats=None, copy_input=True):
 
 #### C언어 구현
 
-```c
-/* 음수도 처리하기 위해 min을 0번 인덱스로 옮긴다. */
-void countingSort(int a[], size_t n, SortStats *s) {
-    if (n < 2) return;
-    
-    int min = a[0], max = a[0];
-    for (size_t i = 1; i < n; ++i) { 
-        if (a[i] < min) min = a[i]; 
-        if (a[i] > max) max = a[i]; 
-    }
-    
-    size_t range = (size_t)((long long)max - min + 1);
-    size_t *count = calloc(range, sizeof *count);
-    int *output = malloc(n * sizeof *output);
-    if (!count || !output) { free(count); free(output); return; }
-    
-    /* 빈도 계산 */
-    for (size_t i = 0; i < n; ++i) 
-        count[(size_t)((long long)a[i] - min)]++;
-    
-    /* 누적합 계산 */
-    for (size_t i = 1; i < range; ++i) 
-        count[i] += count[i - 1];
-    
-    /* 뒤에서부터 출력 배열에 배치 (안정성 보장) */
-    for (size_t i = n; i-- > 0;) 
-        output[--count[(size_t)((long long)a[i] - min)]] = a[i];
-    
-    /* 최종 복사 */
-    for (size_t i = 0; i < n; ++i) { 
-        a[i] = output[i]; 
-        s->moves++;  /* 복사 횟수만 카운트 */
-    }
-    
-    free(count); free(output);
-}
-```
+C언어로 구현한 카운팅 정렬은 원소 간 직접적인 비교 대신 각 값의 등장 횟수를 세어 정렬하는 방식으로, 값의 범위가 크지 않을 때 효율적으로 사용할 수 있습니다. 이 구현에서는 먼저 배열의 최솟값과 최댓값을 구하고, min을 기준으로 각 값을 0 이상의 인덱스로 변환하여 음수를 포함한 입력도 처리합니다. 이후 값의 범위만큼 count 배열을 생성하여 각 원소의 등장 횟수를 저장하고, 누적 합을 계산하여 각 값이 배치될 위치를 결정합니다. 입력 배열을 뒤에서부터 탐색하면서 누적된 위치 정보를 감소시키며 output 배열에 원소를 배치하므로 동일한 값의 상대적인 순서를 유지하는 안정적인 정렬이 이루어집니다. 완성된 output 배열의 값을 원본 배열에 다시 복사하면서 각 원소의 이동 횟수를 SortStats의 moves에 누적합니. count 배열과 output 배열을 추가로 사용하므로 추가 공간 복잡도는 O(n + k)이며, 여기서 k는 입력값의 범위 크기를 의미합니다.
+
 ![카운팅 정렬의 빈도 계산, 누적합 및 출력 배치](./counting-sort-flow.svg)
 
 **진행 방식:**
@@ -502,6 +414,8 @@ void countingSort(int a[], size_t n, SortStats *s) {
 3. count 배열에 각 값의 빈도를 누적합니다.
 4. 뒤에서부터 output 배열에 원소를 배치하여 안정성을 보장합니다.
 5. 최종 결과를 원래 배열로 복사합니다.
+
+**중요:** 현재 구현에서는 min/max 탐색 과정의 비교를 `comparisons` 카운터에 포함하지 않습니다. 따라서 Counting sort의 `comparisons` 값은 항상 0으로 기록됩니다. 
 
 **예시:**
 
@@ -524,33 +438,10 @@ min=2, max=5, k=4
 출력:           [2, 2, 3, 5, 5]
 ```
 
-**중요:** 현재 구현에서는 min/max 탐색 과정의 비교를 `comparisons` 카운터에 포함하지 않습니다. 따라서 Counting sort의 `comparisons` 값은 항상 0으로 기록됩니다. 이는 의도된 동작입니다.
-
 #### Python 구현
 
-파이썬 구현은 입력 값을 기준으로 최소값과 최대값을 구한 뒤 그 범위만큼의 카운트 배열을 만듭니다:
+Python으로 구현한 카운팅 정렬은 원소 간 직접적인 비교 대신 각 값의 등장 횟수를 세어 정렬하는 방식입니다. 먼저 입력 배열에서 최소값과 최대값을 구하고, `maximum - minimum + 1`만큼의 범위를 갖는 `counts` 배열과 결과를 저장할 `output` 배열을 생성합니다. 각 원소를 `minimum`만큼 이동한 인덱스에 대응시켜 등장 횟수를 기록한 뒤, 누적 합을 계산하여 각 값이 배치될 위치를 결정한 뒤, 입력 배열을 뒤에서부터 탐색하면서 누적된 위치를 감소시키고 `output` 배열에 원소를 배치하여 동일한 값의 상대적 순서를 유지하는 안정적인 정렬을 수행합니다. 정렬이 완료되면 `output`의 원소를 `result`에 순서대로 복사하면서 이동 횟수를 `SortStats`의 `moves`에 누적한다. 또한 `copy_input` 옵션을 통해 입력 배열의 복사본을 정렬하거나 원본 배열을 직접 수정할 수 있도록 구현하였습니다.
 
-```python
-def counting_sort(values, stats=None, copy_input=True):
-    result = list(values) if copy_input else values
-    if stats is None:
-        stats = SortStats()
-    if not result:
-        return []
-
-    minimum = min(result)
-    maximum = max(result)
-    counts = [0] * (maximum - minimum + 1)
-
-    for value in result:
-        counts[value - minimum] += 1
-
-    sorted_values = []
-    for offset, amount in enumerate(counts):
-        sorted_values.extend([offset + minimum] * amount)
-    
-    return sorted_values
-```
 
 #### 안정성
 
