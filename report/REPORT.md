@@ -414,6 +414,26 @@ Python으로 구현한 칵테일 셰이커 정렬은 C언어로 구현한 칵테
 
 이 과정은 모든 알고리즘에 동일하게 적용되므로, 결과를 공정하게 비교할 수 있습니다.
 
+sequenceDiagram
+    participant M as main.c
+    participant G as 입력 생성기
+    participant A as 알고리즘
+    participant S as Stats
+    participant V as 검증
+    participant P as plot.py
+
+    M->>G: 입력 패턴 생성
+    G-->>M: random / sorted / reverse / duplicates
+    M->>A: 작업 배열 복사 후 알고리즘 실행
+    A->>S: 비교·이동·시간 기록
+    S-->>M: 통계 수집 완료
+    M->>V: 결과 배열 검증
+    V-->>M: 정렬 여부 확인
+    M->>P: CSV 파일 전달
+    P-->>M: SVG 그래프 생성
+
+Python 실험도 이 구조를 그대로 따라갑니다. src/main.py는 입력을 만들고, 각 정렬 함수가 입력을 받아 정렬 후 결과를 검증하며, 출력 형식이 같도록 CSV나 터미널 문자열 포맷을 생성합니다. 즉, C와 Python 사이에 비교 기준을 맞추는 설계가 동일하게 유지됩니다.
+
 ### 5.2 실험 결과
 
 [각 알고리즘 간의 비교 실험 결과](./results.csv)
