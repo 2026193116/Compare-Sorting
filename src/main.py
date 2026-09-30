@@ -19,7 +19,7 @@ def make_input(size, kind):
         return list(range(size))
 
     if kind == "reverse":
-        return list(range(size, 0, -1))
+        return list(range(size - 1, -1, -1))
 
     if kind == "duplicates":
         return [
