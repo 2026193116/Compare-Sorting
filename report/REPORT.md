@@ -53,75 +53,27 @@ class SortStats:
 
 #### C 구조체 정의
 
-**`src/sortctx.h`** — 모든 C 정렬 구현이 공유하는 기본 구조체와 함수 포인터를 정의합니다:
+**`src/sortctx.h`** — 모든 C 정렬 구현에서 공통으로 사용하는 SortStats 구조체와 SortFunction 함수 포인터 타입을 정의합니다:
 
-```c
-#ifndef SORTCTX_H
-#define SORTCTX_H
+SortStats에는 비교 횟수와 이동 횟수를 저장하고, SortFunction은 모든 정렬 함수가 동일한 함수 형식을 따르도록 정의합니다.
 
-#include <stddef.h>
+모든 C 정렬 함수는 void func(int *array, size_t n, SortStats *stats) 형태의 공통 인터페이스를 따르므로, main.c에서 함수 포인터를 이용해 각 알고리즘을 동일한 방식으로 호출할 수 있습니다
 
-/* Counters shared by every C sorting implementation. */
-typedef struct {
-    unsigned long long comparisons;
-    unsigned long long moves;
-} SortStats;
+**`src/sort.h`** — C언어로 구현된 정렬 함수의 선언과 알고리즘 레지스트리 구조를 정의합니다:
 
-typedef void (*SortFunction)(int *, size_t, SortStats *);
+SortAlgorithm 구조체에 알고리즘 이름, 시간·공간 복잡도, 안정성 여부와 정렬 함수 포인터를 저장하고, 각 정렬 함수와 알고리즘 레지스트리(SORT_ALGORITHMS)를 선언하여 main.c에서 동일한 방식으로 사용할 수 있도록 합니다.
 
-#endif
-```
+**`src/sort.c`** — 각 정렬 알고리즘의 메타데이터와 함수 포인터를 SORT_ALGORITHMS 배열에 등록하고, 등록된 알고리즘의 개수를 관리합니다.
 
-모든 C 정렬 함수는 `void func(int *array, size_t n, SortStats *stats)` 형태의 서명을 따릅니다. 이를 통해 `main.c`에서 동일한 인터페이스로 모든 알고리즘을 호출할 수 있습니다.
-
-**`src/sort.h`** — C 정렬 함수의 선언과 알고리즘 레지스트리 구조를 정의합니다:
-
-```c
-#ifndef SORT_H
-#define SORT_H
-
-#include <stddef.h>
-#include "sortctx.h"
-
-typedef struct {
-    const char *name;
-    const char *timeComplexity;
-    const char *spaceComplexity;
-    int stable;
-    SortFunction sort;
-} SortAlgorithm;
-
-void shellSort(int a[], size_t n, SortStats *stats);
-void countingSort(int a[], size_t n, SortStats *stats);
-void cocktailShakerSort(int a[], size_t n, SortStats *stats);
-
-extern const SortAlgorithm SORT_ALGORITHMS[];
-extern const size_t SORT_ALGORITHM_COUNT;
-
-#endif
-```
-
-**`src/sort.c`** — 알고리즘 레지스트리를 구현하여 모든 정렬 함수와 메타데이터를 한곳에 모아 관리합니다.
+SORT_ALGORITHMS에 등록된 알고리즘 정보를 이용하여 main.c에서 각 정렬 알고리즘을 순차적으로 호출할 수 있도록 구성합니다. 또한 sizeof 연산을 이용해 등록된 알고리즘의 총 개수를 자동으로 계산합니다.
 
 #### Python 구조체 정의
 
 **`src/sort_stats.py`** — Python 정렬 구현이 공유하는 통계 클래스:
 
-```python
-"""Shared statistics for Python sorting implementations."""
+dataclass를 사용하여 통계 정보를 저장하는 SortStats 클래스를 정의합니다. comparisons는 비교 횟수, moves는 이동 횟수를 저장하며 두 값은 기본적으로 0으로 초기화됩니다. 이를 통해 각 Python 정렬 함수에서 동일한 객체를 사용하여 정렬 과정의 통계 정보를 기록할 수 있습니다.
 
-from dataclasses import dataclass
-
-
-@dataclass
-class SortStats:
-    """Counters shared by all Python sorting implementations."""
-
-    comparisons: int = 0
-    moves: int = 0
-```
-
-Python의 모든 정렬 함수는 `result = algorithm(array, stats=stats, copy_input=False)` 형태로 호출되며, `stats` 객체를 통해 통계를 누적합니다.
+Python의 모든 정렬 함수는 result = algorithm(array, stats=stats, copy_input=False) 형태로 호출되며, 전달된 stats 객체에 정렬 과정에서 발생한 비교 횟수와 이동 횟수를 누적합니다.
 
 ### 2.3 파일 구성
 
