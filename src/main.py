@@ -8,6 +8,7 @@ from sort_stats import SortStats
 
 
 def make_input(size, kind):
+    """Create the same deterministic inputs as the C implementation."""
     if kind == "random":
         return [
             (index * 73 + 19) % 1000 - 500
@@ -30,7 +31,9 @@ def make_input(size, kind):
 
 
 def run_case(name, values, csv):
+    """Run every algorithm once and return whether all results were valid."""
     expected = sorted(values)
+    all_valid = True
 
     for algorithm_name, algorithm in SORT_ALGORITHMS:
         # Match the C implementation: input copying happens
@@ -47,6 +50,9 @@ def run_case(name, values, csv):
         elapsed = (time.perf_counter() - start) * 1000
 
         valid = result == expected
+
+        if not valid:
+            all_valid = False
 
         if csv:
             print(
@@ -65,6 +71,8 @@ def run_case(name, values, csv):
                 f"{'yes' if valid else 'NO'}"
             )
 
+    return all_valid
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -73,6 +81,7 @@ def main():
     args = parser.parse_args()
 
     csv = args.csv or args.blocks
+    all_valid = True
 
     if csv:
         print(
@@ -83,7 +92,7 @@ def main():
         print(
             f"{'algorithm':20} "
             f"{'input':12} "
-            f"{'n':8} "
+            f"{'n':>8} "
             f"{'comparisons':12} "
             f"{'moves':12} "
             f"{'time(ms)':10} "
@@ -92,11 +101,12 @@ def main():
 
     if args.blocks:
         for size in (128, 256, 512, 1024, 2048):
-            run_case(
+            if not run_case(
                 "block",
                 make_input(size, "random"),
                 True,
-            )
+            ):
+                all_valid = False
     else:
         for name in (
             "random",
@@ -104,11 +114,14 @@ def main():
             "reverse",
             "duplicates",
         ):
-            run_case(
+            if not run_case(
                 name,
                 make_input(2000, name),
                 csv,
-            )
+            ):
+                all_valid = False
+
+    raise SystemExit(0 if all_valid else 1)
 
 
 if __name__ == "__main__":
