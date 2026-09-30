@@ -1,10 +1,13 @@
 CC ?= gcc
+
 CFLAGS ?= -std=c17 -Wall -Wextra -O2
 DEBUGFLAGS ?= -std=c17 -Wall -Wextra -g -O0
+SANITIZEFLAGS ?= -std=c17 -Wall -Wextra -g \
+	-fsanitize=address,undefined
 
 SORT_SRC = src/sort.c src/shellSort.c src/countingSort.c src/cocktailShakerSort.c
 
-.PHONY: all run test test-c test-py charts clean debug
+.PHONY: all run test test-c test-py charts clean debug sanitize
 
 all: test
 
@@ -29,6 +32,9 @@ charts: src/main.out
 
 debug: src/main.debug.out
 
+sanitize: src/main.sanitize.out
+	@./src/main.sanitize.out
+
 src/main.out: src/main.c $(SORT_SRC) src/sort.h src/sortctx.h
 	$(CC) $(CFLAGS) -Isrc -o $@ src/main.c $(SORT_SRC)
 
@@ -37,6 +43,9 @@ tests/test_sort.out: tests/test_sort.c $(SORT_SRC) src/sort.h src/sortctx.h
 
 src/main.debug.out: src/main.c $(SORT_SRC) src/sort.h src/sortctx.h
 	$(CC) $(DEBUGFLAGS) -Isrc -o $@ src/main.c $(SORT_SRC)
+
+src/main.sanitize.out: src/main.c $(SORT_SRC) src/sort.h src/sortctx.h
+	$(CC) $(SANITIZEFLAGS) -Isrc -o $@ src/main.c $(SORT_SRC)
 
 %.out: %.c
 	$(CC) $(CFLAGS) -I$(@D) -o $@ $<
