@@ -492,7 +492,7 @@ void countingSort(int a[], size_t n, SortStats *s) {
     free(count); free(output);
 }
 ```
-![카운팅 정렬의 빈도 계산, 누적합 및 출력 배치](./counting-sort-flow.svg
+![카운팅 정렬의 빈도 계산, 누적합 및 출력 배치](./counting-sort-flow.svg)
 
 **진행 방식:**
 
