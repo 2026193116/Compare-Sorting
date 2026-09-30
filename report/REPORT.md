@@ -95,7 +95,7 @@ Python의 모든 정렬 함수는 result = algorithm(array, stats=stats, copy_in
 | `tests/test_sort.c` | C 구현 경계 조건 및 결과 검증 |
 | `tests/test_sort.py` | Python 구현 경계 조건 및 결과 검증 |
 | `tools/plot.py` | CSV를 읽어 SVG 그래프 생성 |
-| `algorithm-flow.html` | 세 정렬 알고리즘의 동작 과정을 단계별로 보여주는 인터랙티브 시각화 |
+| `report/algorithm-flow.html` | 세 정렬 알고리즘의 동작 과정을 단계별로 보여주는 인터랙티브 시각화 |
 
 ### 2.4 실행 흐름 구조도
 
