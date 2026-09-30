@@ -50,7 +50,7 @@ static void make_input(int values[], size_t n, size_t kind) {
                 values[i] = (int)i;
                 break;
             case 2:
-                values[i] = (int)(n - i);
+                values[i] = (int)(n - 1 - i);
                 break;
             default:
                 values[i] = (int)((i * 7U + 3U) % 21U) - 10;
