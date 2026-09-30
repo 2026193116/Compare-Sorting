@@ -99,7 +99,7 @@ Python의 모든 정렬 함수는 result = algorithm(array, stats=stats, copy_in
 
 ### 2.4 실행 흐름 구조도
 
-![전체 구현 구조도](./structure.svg)
+![C언어 정렬 구현 구조도](./structure.svg)
 ```mermaid
 flowchart TD
     A[사용자/main.c or main.py 실행] --> B{언어 선택}
