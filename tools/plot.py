@@ -2,9 +2,24 @@ import csv
 import html
 import os
 
-COLORS = {"shellSort": "#4e79a7", "countingSort": "#59a14f", "cocktailShakerSort": "#e15759"}
-NAMES = {"shellSort": "Shell", "countingSort": "Counting", "cocktailShakerSort": "Cocktail"}
-INPUTS = ["random", "sorted", "reverse", "duplicates"]
+COLORS = {
+    "shellSort": "#4e79a7",
+    "countingSort": "#59a14f",
+    "cocktailShakerSort": "#e15759",
+}
+
+NAMES = {
+    "shellSort": "Shell",
+    "countingSort": "Counting",
+    "cocktailShakerSort": "Cocktail",
+}
+
+INPUTS = [
+    "random",
+    "sorted",
+    "reverse",
+    "duplicates",
+]
 
 
 def read_rows(path="report/results.csv"):
@@ -15,10 +30,12 @@ def read_rows(path="report/results.csv"):
 def smart_format(value):
     """
     Format graph values compactly.
-    - Very small values: scientific notation
-    - Small values: decimal precision
-    - Medium values: integer or one decimal place
-    - Large values: K or M units
+
+    - 0 -> "0"
+    - Very small values -> scientific notation
+    - Small values -> decimal notation
+    - Medium values -> integer or one decimal place
+    - Large values -> K / M notation
     """
     if value == 0:
         return "0"
@@ -31,78 +48,163 @@ def smart_format(value):
         if value == int(value):
             return f"{int(value)}"
         return f"{value:.1f}"
-    elif abs(value) < 1000000:
+    elif abs(value) < 1_000_000:
         return f"{value / 1000:.1f}K"
     else:
-        return f"{value / 1000000:.2f}M"
+        return f"{value / 1_000_000:.2f}M"
 
 
 def write_svg(path, title, ylabel, series, x_labels):
     width, height = 860, 470
     left, top, plot_w, plot_h = 80, 65, 735, 320
-    values = [value for points in series.values() for _, value in points]
-    maximum = max(values or [1]) or 1
-    
-    chunks = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}">',
-        '<style>text{font:13px sans-serif}.title{font-size:20px;font-weight:bold}.axis{stroke:#555}.grid{stroke:#ddd}.legend{font-size:12px}.point-label{font-size:10px}</style>',
-        f'<text class="title" x="{left}" y="30">{html.escape(title)}</text>',
-        f'<text transform="translate(18 {top + plot_h / 2}) rotate(-90)" text-anchor="middle">{html.escape(ylabel)}</text>',
-        f'<line class="axis" x1="{left}" y1="{top}" x2="{left}" y2="{top + plot_h}"/><line class="axis" x1="{left}" y1="{top + plot_h}" x2="{left + plot_w}" y2="{top + plot_h}"/>',
+
+    values = [
+        value
+        for points in series.values()
+        for _, value in points
     ]
-    
-    # 그리드와 축 레이블 생성
+
+    maximum = max(values or [1]) or 1
+
+    chunks = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" '
+        f'viewBox="0 0 {width} {height}">',
+
+        (
+            "<style>"
+            "text{font:13px sans-serif}"
+            ".title{font-size:20px;font-weight:bold}"
+            ".axis{stroke:#555}"
+            ".grid{stroke:#ddd}"
+            ".legend{font-size:12px}"
+            ".point-label{font-size:10px}"
+            "</style>"
+        ),
+
+        (
+            f'<text class="title" x="{left}" y="30">'
+            f'{html.escape(title)}</text>'
+        ),
+
+        (
+            f'<text transform="translate(18 '
+            f'{top + plot_h / 2}) rotate(-90)" '
+            f'text-anchor="middle">'
+            f'{html.escape(ylabel)}</text>'
+        ),
+
+        (
+            f'<line class="axis" '
+            f'x1="{left}" y1="{top}" '
+            f'x2="{left}" y2="{top + plot_h}"/>'
+            f'<line class="axis" '
+            f'x1="{left}" y1="{top + plot_h}" '
+            f'x2="{left + plot_w}" y2="{top + plot_h}"/>'
+        ),
+    ]
+
+    # Grid and y-axis labels.
     for tick in range(5):
         y = top + plot_h - tick * plot_h / 4
         value = maximum * tick / 4
-        chunks.append(f'<line class="grid" x1="{left}" y1="{y:.1f}" x2="{left + plot_w}" y2="{y:.1f}"/>')
-        # 스마트 포맷으로 축 레이블 표시
-        chunks.append(f'<text x="{left - 8}" y="{y + 4:.1f}" text-anchor="end">{smart_format(value)}</text>')
-    
+
+        chunks.append(
+            f'<line class="grid" '
+            f'x1="{left}" y1="{y:.1f}" '
+            f'x2="{left + plot_w}" y2="{y:.1f}"/>'
+        )
+
+        chunks.append(
+            f'<text x="{left - 8}" y="{y + 4:.1f}" '
+            f'text-anchor="end">'
+            f'{smart_format(value)}</text>'
+        )
+
+    # X-axis labels.
     count = max(len(x_labels), 1)
+
     for index, label in enumerate(x_labels):
         x = left + index * plot_w / max(count - 1, 1)
-        chunks.append(f'<text x="{x:.1f}" y="{top + plot_h + 24}" text-anchor="middle">{html.escape(str(label))}</text>')
-    
-    # 데이터 포인트와 선 그리기
+
+        chunks.append(
+            f'<text x="{x:.1f}" '
+            f'y="{top + plot_h + 24}" '
+            f'text-anchor="middle">'
+            f'{html.escape(str(label))}</text>'
+        )
+
+    # Data lines, points, and value labels.
     for name, points in series.items():
         coords = []
+
         for index, (_, value) in enumerate(points):
             x = left + index * plot_w / max(count - 1, 1)
-            y = top + plot_h - value / maximum * plot_h
+
+            if maximum == 0:
+                y = top + plot_h
+            else:
+                y = (
+                    top
+                    + plot_h
+                    - value / maximum * plot_h
+                )
+
             coords.append(f"{x:.1f},{y:.1f}")
-        
+
         color = COLORS.get(name, "#777")
-        
-        # 연결선
-        chunks.append(f'<polyline fill="none" stroke="{color}" stroke-width="3" points="{" ".join(coords)}"/>')
-        
-        # 데이터 포인트와 값 레이블
+
+        chunks.append(
+            f'<polyline fill="none" '
+            f'stroke="{color}" stroke-width="3" '
+            f'points="{" ".join(coords)}"/>'
+        )
+
         for i, point in enumerate(coords):
             x, y = point.split(",")
-            x, y = float(x), float(y)
-            
-            # 원형 마커
-            chunks.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" fill="{color}"/>')
-            
-            # 포인트 위에 값 표시 (반올림으로 0처럼 보이는 값도 정확히 표시)
-            _, value = points[i]
+            value = points[i][1]
+
+            chunks.append(
+                f'<circle cx="{x}" cy="{y}" '
+                f'r="4" fill="{color}"/>'
+            )
+
             label = smart_format(value)
-            chunks.append(f'<text class="point-label" x="{x:.1f}" y="{y - 12:.1f}" text-anchor="middle" fill="{color}">{label}</text>')
-    
-    # 범례
+
+            chunks.append(
+                f'<text class="point-label" '
+                f'x="{x}" y="{float(y) - 12:.1f}" '
+                f'text-anchor="middle" '
+                f'fill="{color}">'
+                f'{label}</text>'
+            )
+
+    # Legend.
     for index, name in enumerate(series):
         x = left + index * 170
-        chunks.append(f'<line x1="{x}" y1="{height - 28}" x2="{x + 20}" y2="{height - 28}" stroke="{COLORS.get(name, "#777")}" stroke-width="3"/>')
-        chunks.append(f'<text class="legend" x="{x + 26}" y="{height - 24}">{html.escape(NAMES.get(name, name))}</text>')
-    
-    chunks.append('</svg>')
+        color = COLORS.get(name, "#777")
+
+        chunks.append(
+            f'<line x1="{x}" '
+            f'y1="{height - 28}" '
+            f'x2="{x + 20}" '
+            f'y2="{height - 28}" '
+            f'stroke="{color}" stroke-width="3"/>'
+        )
+
+        chunks.append(
+            f'<text class="legend" '
+            f'x="{x + 26}" '
+            f'y="{height - 24}">'
+            f'{html.escape(NAMES.get(name, name))}</text>'
+        )
+
+    chunks.append("</svg>")
+
     with open(path, "w", encoding="utf-8") as target:
         target.write("\n".join(chunks))
 
 
 def grouped(rows, metric, groups):
-    """주어진 메트릭을 그룹별로 집계합니다."""
     result = {}
 
     for algorithm in COLORS:
@@ -119,9 +221,10 @@ def grouped(rows, metric, groups):
             ]
 
             if not matches:
-                raise ValueError(
+                raise SystemExit(
                     f"Missing data: "
-                    f"algorithm={algorithm}, input={group}"
+                    f"algorithm={algorithm}, "
+                    f"input={group}"
                 )
 
             values = [
@@ -144,47 +247,68 @@ def main():
 
     os.makedirs("report", exist_ok=True)
 
-    # 1. 이론적 복잡도 그래프
+    # 1. Theoretical complexity graph.
     write_svg(
         "report/complexity.svg",
         "Theoretical growth (conceptual)",
         "relative cost",
         {
-            "shellSort": [("n", 2), ("n²", 5)],
-            "countingSort": [("n", 1), ("n+k", 2)],
-            "cocktailShakerSort": [("n", 1), ("n²", 6)]
+            "shellSort": [
+                ("n", 2),
+                ("n²", 5),
+            ],
+            "countingSort": [
+                ("n", 1),
+                ("n+k", 2),
+            ],
+            "cocktailShakerSort": [
+                ("n", 1),
+                ("n²", 6),
+            ],
         },
-        ["small", "large"]
+        ["small", "large"],
     )
 
-    # 2. 입력 형태에 따른 실행 시간
+    # 2. Execution time by input order.
     write_svg(
         "report/input-time.svg",
         "Execution time by input order (n=2000)",
         "time (ms)",
-        grouped(rows, "time_ms", INPUTS),
-        INPUTS
+        grouped(
+            rows,
+            "time_ms",
+            INPUTS,
+        ),
+        INPUTS,
     )
 
-    # 3. 입력 형태에 따른 비교 횟수
+    # 3. Comparisons by input order.
     write_svg(
         "report/input-comparisons.svg",
         "Comparisons by input order (n=2000)",
         "comparisons",
-        grouped(rows, "comparisons", INPUTS),
-        INPUTS
+        grouped(
+            rows,
+            "comparisons",
+            INPUTS,
+        ),
+        INPUTS,
     )
 
-    # 4. 입력 형태에 따른 이동 횟수
+    # 4. Moves by input order.
     write_svg(
         "report/input-moves.svg",
         "Moves by input order (n=2000)",
         "moves",
-        grouped(rows, "moves", INPUTS),
-        INPUTS
+        grouped(
+            rows,
+            "moves",
+            INPUTS,
+        ),
+        INPUTS,
     )
 
-    # 5. 입력 크기에 따른 실행 시간 (scale-time.svg)
+    # 5. Execution time as input size grows.
     block_rows = [
         row
         for row in rows
@@ -204,12 +328,19 @@ def main():
         }
     )
 
-    if sizes != [128, 256, 512, 1024, 2048]:
+    expected_sizes = [
+        128,
+        256,
+        512,
+        1024,
+        2048,
+    ]
+
+    if sizes != expected_sizes:
         raise SystemExit(
             f"Unexpected block sizes: {sizes}"
         )
 
-    # 블록 크기별 시간 변화 그래프
     scale_series = {}
 
     for algorithm in COLORS:
@@ -227,13 +358,21 @@ def main():
 
             if len(matching) != 1:
                 raise SystemExit(
-                    f"Expected exactly one block row for "
-                    f"{algorithm}, n={size}, "
+                    f"Expected exactly one block row "
+                    f"for {algorithm}, n={size}, "
                     f"found {len(matching)}"
                 )
 
-            time_val = float(matching[0]["time_ms"])
-            points.append((str(size), time_val))
+            time_val = float(
+                matching[0]["time_ms"]
+            )
+
+            points.append(
+                (
+                    str(size),
+                    time_val,
+                )
+            )
 
         scale_series[algorithm] = points
 
@@ -242,10 +381,10 @@ def main():
         "Execution time scaling (random input)",
         "time (ms)",
         scale_series,
-        [str(s) for s in sizes]
+        [str(size) for size in sizes],
     )
 
-    print("✓ All graphs generated successfully")
+    print("All graphs generated successfully")
     print("  - report/complexity.svg")
     print("  - report/input-time.svg")
     print("  - report/input-comparisons.svg")
