@@ -374,7 +374,7 @@ void shellSort(int a[], size_t n, SortStats *s) {
     }
 }
 ```
-
+![셸 정렬의 반복 및 gap 감소 흐름](./shell-sort-flow.svg)
 **진행 방식:**
 
 1. `gap = n / 4`에서 시작합니다.
