@@ -475,49 +475,10 @@ Python으로 구현한 카운팅 정렬은 원소 간 직접적인 비교 대신
 
 #### C언어 구현
 
-```c
-/* 양방향으로 한 번씩 훑어 큰 값과 작은 값을 동시에 확정한다. */
-void cocktailShakerSort(int a[], size_t n, SortStats *s) {
-    if (n < 2) return;
-    
-    size_t left = 0, right = n - 1;
-    int swapped = 1;
-    
-    while (swapped) {
-        swapped = 0;
-        
-        /* 왼쪽에서 오른쪽으로: 큰 값을 오른쪽으로 이동 */
-        for (size_t i = left; i < right; ++i) { 
-            s->comparisons++; 
-            if (a[i] > a[i + 1]) { 
-                int t = a[i]; 
-                a[i] = a[i + 1]; 
-                a[i + 1] = t; 
-                s->moves += 3;          /* swap = 3 대입 */
-                swapped = 1; 
-            } 
-        }
-        if (!swapped) break;
-        --right;
-        
-        swapped = 0;
-        
-        /* 오른쪽에서 왼쪽으로: 작은 값을 왼쪽으로 이동 */
-        for (size_t i = right; i > left; --i) { 
-            s->comparisons++; 
-            if (a[i-1] > a[i]) { 
-                int t = a[i-1]; 
-                a[i-1] = a[i]; 
-                a[i] = t; 
-                s->moves += 3;          /* swap = 3 대입 */
-                swapped = 1; 
-            } 
-        }
-        ++left;
-    }
-}
-```
+C언어로 구현한 칵테일 셰이커 정렬은 버블 정렬을 양방향으로 수행하는 방식으로, 한 번의 순회에서 큰 값과 작은 값을 각각 배열의 양쪽 끝으로 이동시킵니다. 먼저 left와 right로 정렬해야 할 구간의 양 끝을 설정하고, 왼쪽에서 오른쪽으로 탐색하면서 인접한 원소를 비교하여 큰 값을 오른쪽으로 이동시킵니다. 정방향 탐색에서 교환이 발생하지 않으면 배열이 이미 정렬된 것으로 판단하고 즉시 종료합니다. 교환이 발생한 경우 right를 하나 줄인 뒤 오른쪽에서 왼쪽으로 다시 탐색하여 작은 값을 왼쪽으로 이동시키고, 이후 left를 하나 증가시켜 이미 정렬된 양쪽 영역을 제외합니다. 이러한 과정을 교환이 더 이상 발생하지 않을 때까지 반복하며, 각 원소 비교 횟수와 교환에 따른 이동 횟수는 SortStats의 comparisons와 moves에 누적하도록 설계하였습다.
+
 ![칵테일 셰이커 정렬의 양방향 순회와 조기 종료](./cocktail-shaker-sort-flow.svg)
+
 **진행 방식:**
 
 1. 왼쪽 포인터(`left`)와 오른쪽 포인터(`right`)를 설정합니다.
@@ -541,65 +502,7 @@ Pass 1 (R→L):  비교 쌍: (6,2), (2,5), (5,4), (4,1), (1,3), (3,1)
 
 #### Python 구현
 
-파이썬 구현은 C와 동일한 양방향 순회를 사용합니다:
-
-```python
-def cocktail_shaker_sort(values, stats=None, copy_input=True):
-    result = list(values) if copy_input else values
-    if stats is None:
-        stats = SortStats()
-    
-    if len(result) < 2:
-        return result
-    
-    left = 0
-    right = len(result) - 1
-
-    while left < right:
-        swapped = False
-
-        /* 왼쪽 → 오른쪽 */
-        for index in range(left, right):
-            stats.comparisons += 1
-            if result[index] > result[index + 1]:
-                result[index], result[index + 1] = result[index + 1], result[index]
-                stats.moves += 3  /* swap = 3 대입 */
-                swapped = True
-
-        right -= 1
-        
-        /* 오른쪽 → 왼쪽 */
-        for index in range(right, left, -1):
-            stats.comparisons += 1
-            if result[index - 1] > result[index]:
-                result[index - 1], result[index] = result[index], result[index - 1]
-                stats.moves += 3  /* swap = 3 대입 */
-                swapped = True
-
-        left += 1
-        if not swapped:
-            break
-
-    return result
-```
-
-#### 장단점
-
-- **장점**
-  - 구현이 단순합니다.
-  - 배열의 양쪽이 정렬 상태에 가까울 때 효율적일 수 있습니다.
-
-- **단점**
-  - 여전히 `O(n²)` 수준의 비교를 수행합니다.
-  - 배열이 거의 정렬되어 있는 경우에도 비교를 완전히 피하지 못합니다.
-
-#### 복잡도
-
-- 추가 공간: `O(1)`
-- 최선: `O(n)` (이미 정렬된 경우)
-- 평균/최악: `O(n²)`
-
----
+Python으로 구현한 칵테일 셰이커 정렬은 C언어로 구현한 칵테일 셰이커 정렬과 같이, 버블 정렬을 양방향으로 수행하는 방식으로, 한 번의 순회에서 큰 값과 작은 값을 각각 배열의 양쪽 끝으로 이동시킵니다. 먼저 left와 right를 이용해 현재 정렬할 범위를 설정하고, 왼쪽에서 오른쪽으로 탐색하면서 인접한 원소를 비교하여 큰 값을 오른쪽으로 이동시킵니다. 정방향 탐색에서 교환이 발생하지 않으면 배열이 정렬된 것으로 판단하여 즉시 종료하고, 교환이 발생하면 right를 하나 줄인 후 오른쪽에서 왼쪽으로 탐색하여 작은 값을 왼쪽으로 이동시킵니다. 역방향 탐색이 끝나면 left를 하나 증가시켜 이미 정렬된 영역을 제외하고 같은 과정을 반복하며, 역방향 탐색에서도 교환이 없으면 정렬을 종료합니다. 비교 횟수와 원소 교환에 따른 이동 횟수는 SortStats 객체의 comparisons와 moves에 누적하여 측정합니다. 또한 copy_input 옵션을 통해 입력 배열의 복사본을 정렬하거나 원본 배열을 직접 수정할 수 있도록 구현하였습니다.
 
 ## 4. 코드에 대한 부가 설명
 
