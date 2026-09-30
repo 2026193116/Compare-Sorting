@@ -25,32 +25,241 @@
 
 입력 생성 방식, 시간 측정 방식, 통계 집계 방식이 조금만 달라도 결과가 서로 다르게 보이기 때문에 세 알고리즘을 각각 따로 구현하는 것만으로는 공정한 비교가 불가능합니다. 본 과제에서는 다음을 보장합니다:
 
-C 구현에서는 `SortStats` 구조체를 이용해 비교 횟수와 이동 횟수를 알고리즘 내부에서 누적하고, 실행 시간은 `main.c`에서 알고리즘 호출 전후를 측정하여 별도로 기록하였습니다.
+**정렬 함수 내부에서는 비교 횟수와 이동 횟수를 `SortStats`에 누적합니다. 실행 시간은 정렬 함수 호출 구간에서 `main.c`와 `main.py`에서 별도로 측정합니다.**
 
 ```c
+/* C: sortctx.h에서 정의 */
 typedef struct {
     unsigned long long comparisons;
     unsigned long long moves;
 } SortStats;
 ```
 
-정렬 함수 내부에서는 비교 횟수와 이동 횟수를 `SortStats`에 누적합니다. 실행 시간은 정렬 함수 호출 구간에서 `main.c`에서 별도로 측정합니다. 이 구조는 다음을 보장합니다:
+```python
+# Python: sort_stats.py에서 정의
+@dataclass
+class SortStats:
+    """Counters shared by all Python sorting implementations."""
+    comparisons: int = 0
+    moves: int = 0
+```
+
+이 구조는 다음을 보장합니다:
 
 1. 같은 입력 조건으로 모든 알고리즘을 시험한다.
 2. 비교 횟수와 이동 횟수를 동일한 기준으로 기록한다.
 3. 시간 측정이 구현마다 달라지지 않는다.
 4. 알고리즘을 추가해도 측정 코드와 테스트 코드를 크게 바꾸지 않아도 된다.
 
-Python 구현도 같은 원리를 따릅니다. `src/main.py`는 입력 생성과 시간 측정을 담당하고, `src/sort.py`는 알고리즘 레지스트리, 각 개별 `*_sort.py` 파일은 알고리즘 구현을 합니다.
+### 2.2 핵심 파일 설명
 
-Python의 핵심 구조는 다음과 같습니다:
+#### C 구조체 정의
+
+**`src/sortctx.h`** — 모든 C 정렬 구현이 공유하는 기본 구조체와 함수 포인터를 정의합니다:
+
+```c
+#ifndef SORTCTX_H
+#define SORTCTX_H
+
+#include <stddef.h>
+
+/* Counters shared by every C sorting implementation. */
+typedef struct {
+    unsigned long long comparisons;
+    unsigned long long moves;
+} SortStats;
+
+typedef void (*SortFunction)(int *, size_t, SortStats *);
+
+#endif
+```
+
+모든 C 정렬 함수는 `void func(int *array, size_t n, SortStats *stats)` 형태의 서명을 따릅니다. 이를 통해 `main.c`에서 동일한 인터페이스로 모든 알고리즘을 호출할 수 있습니다.
+
+**`src/sort.h`** — C 정렬 함수의 선언과 알고리즘 레지스트리 구조를 정의합니다:
+
+```c
+#ifndef SORT_H
+#define SORT_H
+
+#include <stddef.h>
+#include "sortctx.h"
+
+typedef struct {
+    const char *name;
+    const char *timeComplexity;
+    const char *spaceComplexity;
+    int stable;
+    SortFunction sort;
+} SortAlgorithm;
+
+void shellSort(int a[], size_t n, SortStats *stats);
+void countingSort(int a[], size_t n, SortStats *stats);
+void cocktailShakerSort(int a[], size_t n, SortStats *stats);
+
+extern const SortAlgorithm SORT_ALGORITHMS[];
+extern const size_t SORT_ALGORITHM_COUNT;
+
+#endif
+```
+
+**`src/sort.c`** — 알고리즘 레지스트리를 구현하여 모든 정렬 함수와 메타데이터를 한곳에 모아 관리합니다.
+
+#### Python 구조체 정의
+
+**`src/sort_stats.py`** — Python 정렬 구현이 공유하는 통계 클래스:
+
+```python
+"""Shared statistics for Python sorting implementations."""
+
+from dataclasses import dataclass
+
+
+@dataclass
+class SortStats:
+    """Counters shared by all Python sorting implementations."""
+
+    comparisons: int = 0
+    moves: int = 0
+```
+
+Python의 모든 정렬 함수는 `result = algorithm(array, stats=stats, copy_input=False)` 형태로 호출되며, `stats` 객체를 통해 통계를 누적합니다.
+
+### 2.3 파일 구성
+
+| 파일 | 역할 |
+| --- | --- |
+| `src/sortctx.h` | C 정렬의 기본 구조체(`SortStats`, `SortFunction`) 정의 |
+| `src/sort.h` | C 정렬 함수 선언 및 알고리즘 레지스트리 구조 정의 |
+| `src/sort.c` | 알고리즘 레지스트리 구현 |
+| `src/shellSort.c` | 셸 정렬 C 구현 |
+| `src/countingSort.c` | 카운팅 정렬 C 구현 |
+| `src/cocktailShakerSort.c` | 칵테일 셰이커 정렬 C 구현 |
+| `src/main.c` | 입력 생성, 복사, 시간 측정, 검증, CSV 및 표 출력 |
+| `src/sort_stats.py` | Python `SortStats` 클래스 정의 |
+| `src/sort.py` | Python 알고리즘 레지스트리 및 공개 API |
+| `src/shell_sort.py` | 셸 정렬 Python 구현 |
+| `src/counting_sort.py` | 카운팅 정렬 Python 구현 |
+| `src/cocktail_shaker_sort.py` | 칵테일 셰이커 정렬 Python 구현 |
+| `src/main.py` | 입력 생성, 시간 측정, 검증, CSV/표준 출력 실행 |
+| `tests/test_sort.c` | C 구현 경계 조건 및 결과 검증 |
+| `tests/test_sort.py` | Python 구현 경계 조건 및 결과 검증 |
+| `tools/plot.py` | CSV를 읽어 SVG 그래프 생성 |
+
+### 2.4 실행 흐름 구조도
+
+```mermaid
+flowchart TD
+    A[사용자/main.c or main.py 실행] --> B{언어 선택}
+    B -->|C| C["main.c<br/>입력 생성기 호출"]
+    B -->|Python| D["main.py<br/>입력 생성기 호출"]
+    
+    C --> E["입력 배열 생성<br/>(random/sorted/reverse/duplicates)"]
+    D --> E
+    
+    E --> F["작업 배열 복사<br/>(timer 전)"]
+    F --> G["SortStats 초기화<br/>comparisons=0, moves=0"]
+    G --> H["⏱️ 시계 시작"]
+    
+    H --> I["알고리즘 실행<br/>(shellSort/countingSort/cocktailShakerSort)"]
+    I --> J["⏱️ 시계 종료"]
+    
+    J --> K["결과 검증<br/>(expected와 비교)"]
+    K --> L["CSV/표 출력"]
+    L --> M["plot.py로 그래프 생성"]
+    M --> N["SVG 저장"]
+```
+
+### 2.5 C 메인 함수 흐름
+
+C에서는 다음과 같이 동작합니다:
+
+```c
+/* main.c의 핵심 실행 흐름 */
+int main(int argc, char **argv) {
+    int csv = 0;
+    int blocks = 0;
+    
+    /* 인자 파싱 */
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "--csv") == 0) csv = 1;
+        else if (strcmp(argv[i], "--blocks") == 0) blocks = 1;
+    }
+
+    /* 헤더 출력 */
+    if (csv || blocks) {
+        printf("algorithm,input,n,comparisons,moves,time_ms,valid\n");
+    } else {
+        printf("=== sorting comparison ===\n");
+        printf("%-20s %-12s %8s %12s %12s %10s %s\n",
+            "algorithm", "input", "n", "comparisons", "moves", "time(ms)", "valid");
+    }
+
+    /* 일반 입력 실행 (random/sorted/reverse/duplicates) */
+    if (!blocks) {
+        for (size_t kind = 0; kind < sizeof SPECS / sizeof SPECS[0]; ++kind) {
+            if (!run_case(&SPECS[kind], kind, csv)) {
+                return 1;
+            }
+        }
+    }
+
+    /* 크기 증가 실험 (block) */
+    if (blocks) {
+        static const size_t block_sizes[] = {128, 256, 512, 1024, 2048};
+        for (size_t b = 0; b < sizeof block_sizes / sizeof block_sizes[0]; ++b) {
+            InputSpec block = {"block", block_sizes[b]};
+            if (!run_case(&block, 0, 1)) {
+                return 1;
+            }
+        }
+    }
+
+    return 0;
+}
+
+/* 각 케이스 실행 */
+static int run_case(const InputSpec *spec, size_t kind, int csv) {
+    int *input = malloc(spec->size * sizeof *input);
+    int *work = malloc(spec->size * sizeof *work);
+    int *expected = malloc(spec->size * sizeof *expected);
+
+    make_input(input, spec->size, kind);          /* 입력 생성 */
+    memcpy(expected, input, spec->size * sizeof *expected);
+    qsort(expected, spec->size, sizeof *expected, compare_ints);  /* 예상 결과 */
+
+    for (size_t algorithm = 0; algorithm < SORT_ALGORITHM_COUNT; ++algorithm) {
+        memcpy(work, input, spec->size * sizeof *work);  /* 복사 */
+        SortStats stats = {0, 0};
+
+        clock_t start = clock();                    /* 타이머 시작 */
+        SORT_ALGORITHMS[algorithm].sort(work, spec->size, &stats);
+        clock_t end = clock();                      /* 타이머 종료 */
+
+        double ms = 1000.0 * (double)(end - start) / (double)CLOCKS_PER_SEC;
+        int valid = same_array(work, expected, spec->size);
+
+        print_result(SORT_ALGORITHMS[algorithm].name, spec->name,
+                     spec->size, &stats, ms, csv, valid);
+    }
+
+    free(input);
+    free(work);
+    free(expected);
+    return 1;
+}
+```
+
+### 2.6 Python 메인 함수 흐름
+
+Python에서는 다음과 같이 동작합니다:
 
 ```python
 def run_case(name, values, csv):
     expected = sorted(values)
 
     for algorithm_name, algorithm in SORT_ALGORITHMS:
-        # 입력 복사는 타이밍 전에 수행
+        # 입력 복사는 타이밍 전에 수행 (C와 동일)
         work = list(values)
         stats = SortStats()
 
@@ -81,75 +290,48 @@ def run_case(name, values, csv):
                 f"{elapsed:10.3f} "
                 f"{'yes' if valid else 'NO'}"
             )
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--csv", action="store_true")
+    parser.add_argument("--blocks", action="store_true")
+    args = parser.parse_args()
+
+    csv = args.csv or args.blocks
+
+    if csv:
+        print("algorithm,input,n,comparisons,moves,time_ms,valid")
+    else:
+        print("=== sorting comparison ===")
+        print(
+            f"{'algorithm':20} "
+            f"{'input':12} "
+            f"{'n':8} "
+            f"{'comparisons':12} "
+            f"{'moves':12} "
+            f"{'time(ms)':10} "
+            f"valid"
+        )
+
+    if args.blocks:
+        for size in (128, 256, 512, 1024, 2048):
+            run_case("block", make_input(size, "random"), True)
+    else:
+        for name in ("random", "sorted", "reverse", "duplicates"):
+            run_case(name, make_input(2000, name), csv)
 ```
 
-### 2.2 파일 구성
-
-| 파일 | 역할 |
-| --- | --- |
-| `src/sortctx.h` | 정렬 구현에서 공통으로 쓰는 컨텍스트와 유틸 함수 정의 |
-| `src/sort.h` | `SortAlgorithm`, `SortStats`, 함수 포인터 선언 |
-| `src/sort.c` | 알고리즘 레지스트리와 공통 메타데이터 제공 |
-| `src/shellSort.c` | 셸 정렬 C 구현 |
-| `src/countingSort.c` | 카운팅 정렬 C 구현 |
-| `src/cocktailShakerSort.c` | 칵테일 셰이커 정렬 C 구현 |
-| `src/main.c` | 입력 생성, 복사, 시간 측정, 검증, CSV 및 표 출력 |
-| `src/sort.py` | Python 알고리즘 레지스트리 및 공개 API |
-| `src/sort_stats.py` | Python `SortStats` 구현 |
-| `src/shell_sort.py` | 셸 정렬 Python 구현 |
-| `src/counting_sort.py` | 카운팅 정렬 Python 구현 |
-| `src/cocktail_shaker_sort.py` | 칵테일 셰이커 정렬 Python 구현 |
-| `src/main.py` | 입력 생성, 시간 측정, 검증, CSV/표준 출력 실행 |
-| `tests/test_sort.c` | 경계 조건과 결과 검증 |
-| `tools/plot.py` | CSV를 읽어 SVG 그래프 생성 |
-
-### 2.3 구조도
-
-```mermaid
-flowchart TD
-    A[사용자/실험 실행] --> B[main.c / main.py]
-    B --> C[입력 생성기]
-    C --> D[random / sorted / reverse / duplicates]
-    B --> E[알고리즘 호출]
-    E --> F[shellSort]
-    E --> G[countingSort]
-    E --> H[cocktailShakerSort]
-    F --> I[통계 누적: 비교/이동]
-    G --> I
-    H --> I
-    B --> J[시간 측정]
-    I --> K[검증 / CSV 저장 / 그래프 생성]
-    J --> K
-    K --> L[report/ 그래프 SVG]
-```
-
-파이썬 구조는 C 구조와 거의 같은 흐름을 따릅니다. `src/main.py`는 입력을 만들고 각 알고리즘을 호출해 정렬 결과와 실행 시간을 측정하며, `src/sort.py`는 알고리즘 레지스트리 역할을 합니다.
-
-### 2.4 실험 흐름 순서도
-
-```mermaid
-flowchart LR
-    Start([시작]) --> Gen[입력 배열 생성]
-    Gen --> Copy[작업 배열 복사]
-    Copy --> Timer[시계 시작]
-    Timer --> Sort[알고리즘 실행]
-    Sort --> Stats[비교·이동 누적]
-    Stats --> Timer2[시계 종료]
-    Timer2 --> Verify[결과 검증]
-    Verify --> Save[CSV/표 출력]
-    Save --> End([종료])
-```
-
-### 2.5 입력 생성 방식
+### 2.7 입력 생성 방식
 
 실험에서는 네 가지 입력 패턴을 사용합니다:
 
-- `random`: 무작위 배열
-- `sorted`: 이미 정렬된 배열
-- `reverse`: 역순 배열
-- `duplicates`: 중복 값이 많은 배열
+- `random`: 무작위 배열 — `(i * 73 + 19) % 1000 - 500`
+- `sorted`: 이미 정렬된 배열 — `[0, 1, 2, ..., n-1]`
+- `reverse`: 역순 배열 — `[n-1, n-2, ..., 1, 0]`
+- `duplicates`: 중복 값이 많은 배열 — `(i * 7 + 3) % 21 - 10`
 
-이 네 종류는 단일 정렬 알고리즘의 좋은 경우와 나쁜 경우가 각각 무엇인지 확인하는 데 매우 중요합니다. 예를 들어 셸 정렬은 정렬된 배열에서 매우 빠르지만 역순에서 느릴 수 있고, 칵테일 셰이커 정렬은 역순에서 최악의 성능을 보입니다.
+이 네 종류는 단일 정렬 알고리즘의 좋은 경우와 나쁜 경우가 각각 무엇인지 확인하는 데 매우 중요합니다.
 
 ---
 
@@ -157,130 +339,200 @@ flowchart LR
 
 ### 3.1 셸 정렬
 
-셸 정렬은 삽입 정렬을 단일 배열 전체에 적용하는 대신, 일정한 간격(gap)을 두고 부분 배열을 정렬하면서 점점 간격을 줄여가는 방식입니다. 이 구현에서는 `gap = n / 4`에서 시작하여 `gap /= 2`를 반복하고, 마지막에 `gap = 1`인 삽입 정렬 pass를 수행합니다.
+셸 정렬은 삽입 정렬을 단일 배열 전체에 적용하는 대신, 일정한 간격(gap)을 두고 부분 배열을 정렬하면서 점점 간격을 줄여가는 방식입니다.
 
-핵심 아이디어는 "큰 값이 멀리 떨어진 곳에 있으면 큰 간격으로 먼저 정리하고, 점점 세밀하게 다듬는다"는 점입니다. 이 방식은 단순 삽입 정렬만 사용하는 것보다 훨씬 빠릅니다.
+핵심 아이디어는 **"큰 값이 멀리 떨어진 곳에 있으면 큰 간격으로 먼저 정리하고, 점점 세밀하게 다듬는다"**는 점입니다. 이 방식은 단순 삽입 정렬만 사용하는 것보다 훨씬 빠릅니다.
 
-#### C언어 구현 관점의 설명
+#### C언어 구현
 
 ```c
-for (gap = n / 4; gap > 0; gap /= 2) {
-    for (i = gap; i < n; i++) {
-        tmp = arr[i];
-        j = i;
-        while (j >= gap && arr[j - gap] > tmp) {
-            arr[j] = arr[j - gap];
-            j -= gap;
+/*
+ * Shell sort with a quarter-size initial gap.
+ * The gap sequence is floor(n / 4), floor(n / 8), ... , 1.
+ */
+void shellSort(int a[], size_t n, SortStats *s) {
+    size_t gap = n / 4;
+    if (gap == 0) gap = 1;
+
+    while (gap > 0) {
+        for (size_t i = gap; i < n; ++i) {
+            int value = a[i];
+            size_t j = i;
+            while (j >= gap) {
+                s->comparisons++;                    /* 비교 카운트 */
+                if (a[j - gap] <= value) break;
+                a[j] = a[j - gap];
+                s->moves++;                          /* 이동 카운트 */
+                j -= gap;
+            }
+            if (j != i) {
+                a[j] = value;
+                s->moves++;                          /* 최종 대입 카운트 */
+            }
         }
-        arr[j] = tmp;
+        gap /= 2;
     }
 }
 ```
 
-셸 정렬의 반복 및 gap 감소 흐름은 다음과 같습니다:
+**진행 방식:**
 
-셸 정렬의 진행 구조는 `gap`을 통해 인접하지 않은 원소도 비교할 수 있다는 점입니다. 예를 들어 배열의 원소들이 뒤섞여 있어도, 5칸 간격으로 떨어진 원소들을 먼저 정렬하면 배열이 미리 정렬된 상태에 가까워집니다. 이후 간격을 줄여 최종적으로 `gap = 1`일 때 삽입 정렬을 수행하면, 배열이 이미 거의 정렬된 상태이므로 매우 빠릅니다.
+1. `gap = n / 4`에서 시작합니다.
+2. gap만큼 떨어진 원소들을 비교하고 삽입 정렬합니다.
+3. gap을 절반으로 줄입니다.
+4. gap이 0이 될 때까지 반복합니다.
 
-#### Python 구현 관점의 설명
+**예시 (n=16, gap 수열: 4 → 2 → 1):**
 
-파이썬 버전의 셸 정렬은 C 구현과 동일하게 큰 간격부터 시작해 점차 gap을 줄여 나가는 구조를 사용합니다. Python에서는 리스트 인덱싱과 슬라이싱을 활용하여 구현합니다:
+```
+원래 배열:  [16, 12, 8, 4, 15, 11, 7, 3, 14, 10, 6, 2, 13, 9, 5, 1]
+
+gap=4 후:   [4, 3, 1, 2, 5, 9, 6, 1, ...]   (4칸씩 떨어진 원소 정렬)
+
+gap=2 후:   [1, 2, 3, 4, 5, 6, ...]         (2칸씩 떨어진 원소 정렬)
+
+gap=1 후:   [1, 2, 3, 4, 5, 6, ..., 16]     (1칸씩 = 최종 삽입 정렬)
+```
+
+#### Python 구현
+
+파이썬 버전은 C와 동일한 gap 수열을 사용합니다:
 
 ```python
-def shell_sort(values):
-    result = list(values)
+def shell_sort(values, stats=None, copy_input=True):
+    result = list(values) if copy_input else values
+    if stats is None:
+        stats = SortStats()
+    
     gap = max(1, len(result) // 4)
 
     while gap > 0:
         for index in range(gap, len(result)):
             value = result[index]
             j = index
-            while j >= gap and result[j - gap] > value:
+            while j >= gap:
+                stats.comparisons += 1
+                if result[j - gap] <= value:
+                    break
                 result[j] = result[j - gap]
+                stats.moves += 1
                 j -= gap
-            result[j] = value
+            if j != index:
+                result[j] = value
+                stats.moves += 1
         gap //= 2
 
     return result
 ```
 
-이 구현은 C 코드와 같은 핵심 아이디어를 유지합니다. `gap` 값이 커질수록 멀리 떨어진 원소들이 빠르게 정렬되고, gap이 줄어들수록 세밀한 정렬이 진행됩니다.
-
 #### 장단점
 
-- 장점
+- **장점**
   - 추가 배열이 필요 없습니다.
-  - 큰 규모의 배열에서 삽입 정렬보다 더 나은 성능을 보일 수 있습니다.
+  - 큰 규모의 배열에서 삽입 정렬보다 훨씬 더 나은 성능을 보입니다.
   - 구현이 비교적 단순합니다.
-- 단점
+
+- **단점**
   - 안정 정렬이 아닙니다.
-  - gap 수열에 따라 성능 편차가 크고, 최악의 경우 시간 복잡도가 높아질 수 있습니다.
+  - gap 수열에 따라 성능 편차가 크게 변합니다.
 
 #### 복잡도
 
 - 추가 공간: `O(1)`
 - 최선: `O(n log n)` (특정 gap 수열과 입력에 따라)
-- 평균: 사용한 gap 수열에 따라 달라짐
+- 평균: gap 수열에 의존 (본 구현은 대략 `O(n^1.5)` 근처)
 - 최악: `O(n²)`
 
-Shell sort의 시간 복잡도는 gap sequence에 크게 의존합니다. 본 구현에서 사용하는 `gap = n/4, n/8, ..., 1` 수열은 실험상 평균적으로 `O(n^1.5)` 근처의 성능을 보이지만, 이는 gap 수열에 따라 달라질 수 있습니다. 따라서 모든 Shell sort의 일반적인 복잡도를 단정하지 않는 것이 정확합니다.
+**중요:** Shell sort의 시간 복잡도는 gap sequence에 크게 의존합니다. 본 구현에서 사용하는 `gap = n/4, n/8, ..., 1` 수열은 평균적으로 `O(n^1.5)` 근처의 성능을 보이지만, 모든 Shell sort의 일반적인 복잡도를 단정하지 않는 것이 정확합니다.
 
 ---
 
 ### 3.2 카운팅 정렬
 
-카운팅 정렬은 값의 범위가 제한된 정수 배열에서 매우 강력한 알고리즘입니다. 핵심은 각 값이 몇 번 등장하는지 개수를 세고, 그 누적 결과를 이용해 각 값이 정렬된 배열에서 어느 위치에 들어가야 하는지 계산하는 것입니다.
+카운팅 정렬은 값의 범위가 제한된 정수 배열에서 매우 강력한 알고리즘입니다. 핵심은 **각 값이 몇 번 등장하는지 개수를 세고, 그 누적 결과를 이용해 각 값이 정렬된 배열에서 어느 위치에 들어가야 하는지 계산**하는 것입니다.
 
-이 방식은 비교 기반 정렬이 아니라 "빈도 기반 정렬"에 가깝습니다. 따라서 정렬 대상 값이 작은 범위의 정수일 때, 비교 횟수보다 값의 등장 횟수와 범위가 성능을 결정합니다.
+이 방식은 비교 기반 정렬이 아니라 "빈도 기반 정렬"에 가깝습니다.
 
-#### C언어 구현 관점의 설명
+#### C언어 구현
 
 ```c
-int min = arr[0], max = arr[0];
-
-for (size_t i = 1; i < n; ++i) { 
-    if (arr[i] < min) min = arr[i]; 
-    if (arr[i] > max) max = arr[i]; 
-}
-
-size_t range = (size_t)((long long)max - min + 1);
-size_t *count = calloc(range, sizeof *count);
-int *output = malloc(n * sizeof *output);
-
-for (i = 0; i < n; i++) {
-    count[(size_t)((long long)arr[i] - min)]++;
-}
-
-for (i = 1; i < range; i++) {
-    count[i] += count[i - 1];
-}
-
-for (i = n; i-- > 0;) {
-    output[--count[(size_t)((long long)arr[i] - min)]] = arr[i];
-}
-
-for (size_t i = 0; i < n; ++i) { 
-    a[i] = output[i]; 
-    s->moves++; 
+/* 음수도 처리하기 위해 min을 0번 인덱스로 옮긴다. */
+void countingSort(int a[], size_t n, SortStats *s) {
+    if (n < 2) return;
+    
+    int min = a[0], max = a[0];
+    for (size_t i = 1; i < n; ++i) { 
+        if (a[i] < min) min = a[i]; 
+        if (a[i] > max) max = a[i]; 
+    }
+    
+    size_t range = (size_t)((long long)max - min + 1);
+    size_t *count = calloc(range, sizeof *count);
+    int *output = malloc(n * sizeof *output);
+    if (!count || !output) { free(count); free(output); return; }
+    
+    /* 빈도 계산 */
+    for (size_t i = 0; i < n; ++i) 
+        count[(size_t)((long long)a[i] - min)]++;
+    
+    /* 누적합 계산 */
+    for (size_t i = 1; i < range; ++i) 
+        count[i] += count[i - 1];
+    
+    /* 뒤에서부터 출력 배열에 배치 (안정성 보장) */
+    for (size_t i = n; i-- > 0;) 
+        output[--count[(size_t)((long long)a[i] - min)]] = a[i];
+    
+    /* 최종 복사 */
+    for (size_t i = 0; i < n; ++i) { 
+        a[i] = output[i]; 
+        s->moves++;  /* 복사 횟수만 카운트 */
+    }
+    
+    free(count); free(output);
 }
 ```
 
-카운팅 정렬의 핵심 단계:
+**진행 방식:**
 
-1. 입력값의 최솟값과 최댓값을 찾습니다.
+1. 최솟값과 최댓값을 찾습니다.
 2. `k = max - min + 1`로 범위를 계산합니다.
 3. count 배열에 각 값의 빈도를 누적합니다.
 4. 뒤에서부터 output 배열에 원소를 배치하여 안정성을 보장합니다.
 5. 최종 결과를 원래 배열로 복사합니다.
 
-입력 값에 음수가 포함될 수 있으므로 최솟값 `min`을 기준으로 `value - min`을 offset으로 사용합니다. 따라서 count 배열은 `max - min + 1` 크기로 구성됩니다.
+**예시:**
 
-#### Python 구현 관점의 설명
+```
+입력:           [5, 2, 3, 2, 5]
+min=2, max=5, k=4
 
-파이썬 구현은 입력 값을 기준으로 최소값과 최대값을 구한 뒤 그 범위만큼의 카운트 배열을 만듭니다. 이후 각 값의 빈도를 세고, 누적합 방식으로 최종 배열을 구성합니다:
+빈도:           [0, 0, 1, 0]  (값 2: 1개, 값 5: 2개)
+                 0  1  2  3   (인덱스는 value - min)
+
+누적합:         [0, 2, 2, 4]  (값 2: 위치 0-1, 값 5: 위치 2-3)
+
+뒤에서부터 배치:
+  i=4: a[4]=5 → count[3]=3 → output[3]=5
+  i=3: a[3]=2 → count[0]=1 → output[1]=2
+  i=2: a[2]=3 → count[1]=1 → output[0]=3
+  i=1: a[1]=2 → count[0]=0 → output[0]=2
+  i=0: a[0]=5 → count[3]=2 → output[2]=5
+
+출력:           [2, 2, 3, 5, 5]
+```
+
+**중요:** 현재 구현에서는 min/max 탐색 과정의 비교를 `comparisons` 카운터에 포함하지 않습니다. 따라서 Counting sort의 `comparisons` 값은 항상 0으로 기록됩니다. 이는 의도된 동작입니다.
+
+#### Python 구현
+
+파이썬 구현은 입력 값을 기준으로 최소값과 최대값을 구한 뒤 그 범위만큼의 카운트 배열을 만듭니다:
 
 ```python
-def counting_sort(values):
-    result = list(values)
+def counting_sort(values, stats=None, copy_input=True):
+    result = list(values) if copy_input else values
+    if stats is None:
+        stats = SortStats()
     if not result:
         return []
 
@@ -294,10 +546,9 @@ def counting_sort(values):
     sorted_values = []
     for offset, amount in enumerate(counts):
         sorted_values.extend([offset + minimum] * amount)
+    
     return sorted_values
 ```
-
-이 코드에서 `counts` 배열은 값의 빈도를 저장하는 역할을 하며, 각 값이 실제로 어디에 놓여야 하는지를 번호로 표시하는 누적 구조로 활용됩니다. 값 범위가 제한된 경우에는 매우 우수한 성능을 보입니다.
 
 #### 안정성
 
@@ -305,86 +556,131 @@ def counting_sort(values):
 
 #### 장단점
 
-- 장점
+- **장점**
   - 값의 범위가 작을 때 매우 빠릅니다.
   - `O(n+k)` 형태로 동작할 수 있어 대규모 데이터에 유리합니다.
   - 안정 정렬이 가능합니다.
-- 단점
+
+- **단점**
   - 정수 값 범위가 클 경우 메모리 사용량이 크게 늘어납니다.
-  - 일반적인 비교 기반 정렬처럼 실수나 문자열을 직접 정렬하기 어렵습니다.
+  - 실수나 문자열을 직접 정렬하기 어렵습니다.
 
 #### 복잡도
 
 - 추가 공간: `O(n+k)`
 - 시간: `O(n+k)`
-- 여기서 `k = max - min + 1`, 즉 입력값의 최솟값과 최댓값 사이에 포함되는 정수 값의 개수입니다.
 
-값 범위가 제한된 경우에는 매우 우수한 성능을 보이지만, 값이 큰 범위에 걸쳐 분포되어 있으면 카운팅 정렬의 장점이 사라집니다.
+**여기서 `k = max - min + 1`**, 즉 입력값의 최솟값과 최댓값 사이에 포함되는 정수 값의 개수입니다.
 
 ---
 
 ### 3.3 칵테일 셰이커 정렬
 
-칵테일 셰이커 정렬은 버블 정렬의 변형입니다. 한쪽 방향으로 큰 값을 뒤로 보내는 대신, 왼쪽에서 오른쪽으로 진행한 뒤 다시 오른쪽에서 왼쪽으로 진행하면서 작은 값을 앞으로 가져옵니다.
+칵테일 셰이커 정렬은 버블 정렬의 변형입니다. 한쪽 방향으로 큰 값을 뒤로 보내는 대신, **왼쪽에서 오른쪽으로 진행한 뒤 다시 오른쪽에서 왼쪽으로 진행**하면서 작은 값을 앞으로 가져옵니다.
 
-이 알고리즘은 특히 배열이 양 끝에서 이미 정렬된 상태에 가까울 때 유리할 수 있습니다. 그러나 전체적으로는 비교 횟수와 교환 횟수가 많아지기 쉬우므로, 실무에서는 더 효율적인 알고리즘을 선호합니다.
+이 알고리즘은 특히 배열이 양 끝에서 이미 정렬된 상태에 가까울 때 유리할 수 있습니다.
 
-#### C언어 구현 관점의 설명
+#### C언어 구현
 
 ```c
-for (left = 0, right = n - 1; left < right; ) {
-    swapped = 0;
-
-    for (i = left; i < right; i++) {
-        if (arr[i] > arr[i + 1]) {
-            swap(arr[i], arr[i + 1]);
-            swapped = 1;
+/* 양방향으로 한 번씩 훑어 큰 값과 작은 값을 동시에 확정한다. */
+void cocktailShakerSort(int a[], size_t n, SortStats *s) {
+    if (n < 2) return;
+    
+    size_t left = 0, right = n - 1;
+    int swapped = 1;
+    
+    while (swapped) {
+        swapped = 0;
+        
+        /* 왼쪽에서 오른쪽으로: 큰 값을 오른쪽으로 이동 */
+        for (size_t i = left; i < right; ++i) { 
+            s->comparisons++; 
+            if (a[i] > a[i + 1]) { 
+                int t = a[i]; 
+                a[i] = a[i + 1]; 
+                a[i + 1] = t; 
+                s->moves += 3;          /* swap = 3 대입 */
+                swapped = 1; 
+            } 
         }
-    }
-    right--;
-
-    for (i = right; i > left; i--) {
-        if (arr[i - 1] > arr[i]) {
-            swap(arr[i - 1], arr[i]);
-            swapped = 1;
+        if (!swapped) break;
+        --right;
+        
+        swapped = 0;
+        
+        /* 오른쪽에서 왼쪽으로: 작은 값을 왼쪽으로 이동 */
+        for (size_t i = right; i > left; --i) { 
+            s->comparisons++; 
+            if (a[i-1] > a[i]) { 
+                int t = a[i-1]; 
+                a[i-1] = a[i]; 
+                a[i] = t; 
+                s->moves += 3;          /* swap = 3 대입 */
+                swapped = 1; 
+            } 
         }
+        ++left;
     }
-    left++;
-
-    if (!swapped) break;
 }
 ```
 
-칵테일 셰이커 정렬의 양방향 순회와 조기 종료 흐름은 다음과 같습니다:
+**진행 방식:**
 
-1. 왼쪽에서 오른쪽으로 진행하면서 큰 값을 오른쪽으로 이동시킵니다.
-2. 오른쪽에서 왼쪽으로 진행하면서 작은 값을 왼쪽으로 이동시킵니다.
-3. 한 바퀴에서 교환이 없으면 정렬이 완료된 것이므로 조기 종료합니다.
+1. 왼쪽 포인터(`left`)와 오른쪽 포인터(`right`)를 설정합니다.
+2. 왼쪽에서 오른쪽으로 진행하면서 큰 값을 오른쪽으로 이동시킵니다.
+3. 오른쪽에서 왼쪽으로 진행하면서 작은 값을 왼쪽으로 이동시킵니다.
+4. 한 바퀴에서 교환이 없으면 정렬이 완료됩니다.
 
-이 구조는 "한 바퀴를 왼쪽에서 오른쪽으로, 한 바퀴를 오른쪽에서 왼쪽으로" 진행한다는 점이 중요합니다. 이것은 버블 정렬의 단일 방향 순회를 개선합니다.
+**예시:**
 
-#### Python 구현 관점의 설명
+```
+원래 배열: [3, 1, 4, 1, 5, 9, 2, 6]
 
-파이썬 구현은 `left`와 `right` 인덱스가 각각 배열의 시작과 끝을 가리키면서 양방향으로 정렬을 진행합니다:
+Pass 1 (L→R):  비교 쌍: (3,1), (1,4), (4,1), (1,5), (5,9), (9,2), (2,6)
+                → [1, 3, 1, 4, 5, 2, 6, 9]  (9가 끝에 확정)
+
+Pass 1 (R→L):  비교 쌍: (6,2), (2,5), (5,4), (4,1), (1,3), (3,1)
+                → [1, 1, 3, 4, 5, 2, 6, 9]  (1이 처음에 확정)
+
+... (반복)
+```
+
+#### Python 구현
+
+파이썬 구현은 C와 동일한 양방향 순회를 사용합니다:
 
 ```python
-def cocktail_shaker_sort(values):
-    result = list(values)
+def cocktail_shaker_sort(values, stats=None, copy_input=True):
+    result = list(values) if copy_input else values
+    if stats is None:
+        stats = SortStats()
+    
+    if len(result) < 2:
+        return result
+    
     left = 0
     right = len(result) - 1
 
     while left < right:
         swapped = False
 
+        /* 왼쪽 → 오른쪽 */
         for index in range(left, right):
+            stats.comparisons += 1
             if result[index] > result[index + 1]:
                 result[index], result[index + 1] = result[index + 1], result[index]
+                stats.moves += 3  /* swap = 3 대입 */
                 swapped = True
 
         right -= 1
+        
+        /* 오른쪽 → 왼쪽 */
         for index in range(right, left, -1):
+            stats.comparisons += 1
             if result[index - 1] > result[index]:
                 result[index - 1], result[index] = result[index], result[index - 1]
+                stats.moves += 3  /* swap = 3 대입 */
                 swapped = True
 
         left += 1
@@ -394,15 +690,13 @@ def cocktail_shaker_sort(values):
     return result
 ```
 
-이 구현은 버블 정렬과 매우 비슷하지만, 한 방향에서 끝까지 비교하는 대신 양쪽에서 번갈아 비교하며 정렬을 진행합니다. 그래서 전체적으로는 버블 정렬보다 약간의 개선을 보일 수 있습니다.
-
 #### 장단점
 
-- 장점
+- **장점**
   - 구현이 단순합니다.
   - 배열의 양쪽이 정렬 상태에 가까울 때 효율적일 수 있습니다.
-  - 무작위 배열보다는 특정 분포에서 약간의 이점을 낼 수 있습니다.
-- 단점
+
+- **단점**
   - 여전히 `O(n²)` 수준의 비교를 수행합니다.
   - 배열이 거의 정렬되어 있는 경우에도 비교를 완전히 피하지 못합니다.
 
@@ -412,51 +706,40 @@ def cocktail_shaker_sort(values):
 - 최선: `O(n)` (이미 정렬된 경우)
 - 평균/최악: `O(n²)`
 
-칵테일 셰이커 정렬은 버블 정렬의 변형으로, 왼쪽에서 오른쪽으로 진행하며 큰 값을 뒤로 보내고, 다시 오른쪽에서 왼쪽으로 진행하며 작은 값을 앞으로 가져옵니다.
-
 ---
 
 ## 4. 코드에 대한 부가 설명
 
 ### 4.1 통계 누적의 중요성
 
-정렬 알고리즘을 비교할 때 가장 중요한 것은 "어떤 기준으로 측정하느냐"입니다. 비교 횟수, 이동 횟수, 시간 측정을 모두 분리해 기록하고, 이를 합리적으로 해석해야 합니다.
+정렬 알고리즘을 비교할 때 가장 중요한 것은 **"어떤 기준으로 측정하느냐"**입니다. 비교 횟수, 이동 횟수, 시간 측정을 모두 분리해 기록하고, 이를 합리적으로 해석해야 합니다.
 
 본 구현에서는 다음과 같이 정의합니다:
 
-- 비교 횟수: 해당 구현에서 `comparisons` 카운터가 증가하는 원소 비교의 횟수
-- 이동 횟수: 해당 구현에서 `moves` 카운터가 증가하는 배열 대입 또는 교환 작업의 횟수
-- 실행 시간: 정렬 함수 호출 구간에서 측정한 수행 시간
+- **비교 횟수**: 해당 구현에서 `comparisons` 카운터가 증가하는 원소 비교의 횟수
+- **이동 횟수**: 해당 구현에서 `moves` 카운터가 증가하는 배열 대입 또는 교환 작업의 횟수
+- **실행 시간**: 정렬 함수 호출 구간에서 측정한 수행 시간
 
 알고리즘마다 내부 자료구조와 연산 방식이 다르기 때문에 `moves`는 모든 알고리즘에서 동일한 물리적 연산량을 의미하지 않습니다. 예를 들어:
 
-- 셸 정렬의 `moves`는 배열 원소를 한 칸씩 밀어내는 대입 연산입니다.
-- 칵테일 셰이커 정렬의 `moves`는 한 번의 교환을 세 번의 대입으로 계산합니다.
-- 카운팅 정렬의 `moves`는 최종 결과를 원래 배열로 복사하는 과정만 포함합니다.
+- **셸 정렬의 `moves`**: 배열 원소를 한 칸씩 밀어내는 대입 연산
+- **칵테일 셰이커 정렬의 `moves`**: 한 번의 교환을 세 번의 대입(temp 할당, 첫 대입, 두 번째 대입)으로 계산
+- **카운팅 정렬의 `moves`**: 최종 결과를 원래 배열로 복사하는 과정만 포함
 
-카운팅 정렬은 비교 기반 정렬이 아니므로, 최소값과 최대값을 찾는 과정의 비교를 `comparisons` 카운터에 포함하지 않습니다. 따라서 Counting sort의 `comparisons` 값은 0으로 기록됩니다. 이는 현재 구현 기준으로 의도된 동작입니다.
+### 4.2 Counting sort의 comparisons = 0에 대해
 
-이 값들은 서로 독립적으로 변화합니다. 예를 들어 버블 정렬 기반의 칵테일 셰이커는 비교 횟수는 많지만, 이동 횟수는 입력 분포에 따라 크게 달라집니다. 반대로 카운팅 정렬은 값 범위가 작으면 매우 빠르지만, 범위가 커지면 메모리와 비용이 증가합니다.
+카운팅 정렬은 비교 기반 정렬이 아니므로, 최소값과 최대값을 찾는 과정의 비교를 `comparisons` 카운터에 포함하지 않습니다. 따라서 Counting sort의 `comparisons` 값은 0으로 기록됩니다. **이는 현재 구현 기준으로 의도된 동작입니다.**
 
-따라서 결과 분석에서는 "시간이 적게 걸린다"만 보고 끝내지 않고, 무엇 때문에 빠른지까지 함께 파악하고자 합니다.
+### 4.3 Counting sort의 moves = 2000에 대해
 
-### 4.2 구현에서 가장 중요한 구조적 요소
+현재 `n=2,000`인 실험에서 Counting sort의 `moves`는 입력 형태와 관계없이 **2,000**으로 기록됩니다. 이는 최종 결과를 원래 배열로 복사하는 과정에서 각 원소를 한 번씩 이동시키기 때문입니다:
 
-#### 1) 반복문 구조
-
-각 알고리즘은 모두 반복 구조를 통해 동작합니다. 셸 정렬은 gap을 줄이는 반복문, 카운팅 정렬은 누적 배열 계산, 칵테일 셰이커 정렬은 좌우 양방향 순회입니다.
-
-#### 2) 배열 수정 방식
-
-- 셸 정렬: 제자리 정렬, 추가 메모리 거의 없음
-- 카운팅 정렬: 출력 배열을 별도로 사용
-- 칵테일 셰이커: 제자리 교환 중심
-
-구현 방식은 단순히 "정렬 결과를 맞춘다"를 넘어, 메모리 사용량과 성능 분포에도 직접적인 영향을 미칩니다.
-
-#### 3) 안정성 판단 기준
-
-동일한 키 값이 여러 개 있을 때 입력 순서가 보존되는지를 안정성으로 봅니다. 카운팅 정렬과 칵테일 셰이커 정렬은 일반적으로 안정적이고, 셸 정렬은 불안정합니다.
+```c
+for (size_t i = 0; i < n; ++i) { 
+    a[i] = output[i]; 
+    s->moves++;  /* 이 부분에서만 moves 증가 */
+}
+```
 
 ---
 
@@ -475,57 +758,24 @@ def cocktail_shaker_sort(values):
 
 이 과정은 모든 알고리즘에 동일하게 적용되므로, 결과를 공정하게 비교할 수 있습니다.
 
-```mermaid
-sequenceDiagram
-    participant M as main.c
-    participant G as 입력 생성기
-    participant A as 알고리즘
-    participant S as Stats
-    participant V as 검증
-    participant P as plot.py
-
-    M->>G: 입력 패턴 생성
-    G-->>M: random / sorted / reverse / duplicates
-    M->>A: 작업 배열 복사 후 알고리즘 실행
-    A->>S: 비교·이동 기록
-    S-->>M: 통계 수집 완료
-    M->>V: 결과 배열 검증
-    V-->>M: 정렬 여부 확인
-    M->>P: CSV 파일 전달
-    P-->>M: SVG 그래프 생성
-```
-
-Python 실험도 이 구조를 그대로 따릅니다. `src/main.py`는 입력을 만들고, 각 정렬 함수가 입력을 받아 정렬 후 결과를 검증하며, 출력 형식이 같도록 CSV로 기록합니다.
-
 ### 5.2 실험 결과
 
-입력 형태와 입력 크기에 따라 나타나는 알고리즘의 차이를 그래프를 활용하여 시각적으로 표현하였습니다.
-
-#### 5.2.1 입력 형태에 따른 알고리즘의 상대적 작업량 차이
-
-![입력 형태에 따른 알고리즘 동작](input-behavior.svg)
-
-그래프를 통해 네 가지 입력 패턴(무작위, 정렬됨, 역순, 중복 많음)에서 알고리즘이 보일 수 있는 상대적인 작업량 차이를 나타내었고, 셸 정렬과 칵테일 셰이커 정렬은 입력에 따라 성능이 크게 달라집니다.
-
-#### 5.2.2 이론적 복잡도
-
-![복잡도 개념 그래프](complexity.svg)
-
-이 그래프는 실제 측정값이 아니라 각 알고리즘의 이론적인 증가율을 개념적으로 비교한 것입니다. 셸 정렬은 대략 `O(n^1.5)` 근처의 성능을 보일 수 있으며, 카운팅 정렬은 `O(n+k)`로 선형 증가를 보입니다.
-
-#### 5.2.3 입력 형태에 따른 실행 시간
+#### 5.2.1 입력 형태에 따른 실행 시간
 
 ![입력 형태별 실행 시간](input-time.svg)
 
 동일한 크기(`n=2,000`)의 네 가지 입력 패턴에 대해 실행 시간을 측정하였습니다. 실행 시간은 실행 환경과 시스템 부하에 따라 달라질 수 있으므로 `report/results.csv`의 측정값을 기준으로 해석하였습니다.
 
-실행 시간은 동일한 입력 크기에서의 상대적인 차이를 관찰하기 위한 지표로 사용하였으며, C와 Python의 절대 실행 시간을 직접 비교하기보다는 각 언어 내부에서 알고리즘 간 차이를 중심으로 분석하였습니다.
+**결과 분석:**
+- **셸 정렬**: sorted 입력에서 가장 빠르고 (0.017ms), random/reverse에서는 약 0.03ms 정도로 안정적
+- **카운팅 정렬**: sorted에서는 약간 느리지만 (0.033ms), reverse에서 가장 빠름 (0.006ms)
+- **칵테일 셰이커**: reverse에서 가장 느림 (15.697ms), random도 상당함 (8.575ms)
 
-#### 5.2.4 입력 형태에 따른 비교 횟수
+#### 5.2.2 입력 형태에 따른 비교 횟수
 
 ![입력 형태별 비교 횟수](input-comparisons.svg)
 
-비교 기반 정렬 알고리즘(셸, 칵테일)에서는 입력 패턴에 따라 비교 횟수가 크게 달라집니다. 동일한 `n=2,000`에 대해 측정된 비교 카운터를 비교하였습니다:
+비교 기반 정렬 알고리즘(셸, 칵테일)에서는 입력 패턴에 따라 비교 횟수가 크게 달라집니다:
 
 | 입력 | 셸 정렬 | 카운팅 | 칵테일 셰이커 |
 |---|---:|---:|---:|
@@ -534,18 +784,16 @@ Python 실험도 이 구조를 그대로 따릅니다. `src/main.py`는 입력�
 | reverse | 26,416 | 0 | 1,999,000 |
 | duplicates | 18,192 | 0 | 1,382,395 |
 
-Counting sort는 비교 기반 정렬이 아니며, 현재 구현에서는 min/max 탐색 과정의 비교를 `comparisons` 카운터에 포함하지 않습니다. 따라서 해당 카운터는 0으로 기록됩니다.
+**분석:**
+- 셸 정렬은 입력 형태에 관계없이 약 17K~26K 범위에서 안정적
+- 칵테일 셰이커는 sorted에서 최소(1,999), reverse에서 최악(1,999,000)
+- Counting sort는 비교 기반이 아니므로 0 (의도된 동작)
 
-#### 5.2.5 입력 형태에 따른 이동 횟수
+#### 5.2.3 입력 형태에 따른 이동 횟수
 
 ![입력 형태별 이동 횟수](input-moves.svg)
 
 `moves`는 각 구현에서 명시적으로 카운트한 배열 대입 및 교환 작업을 의미합니다:
-- Shell sort는 원소 이동과 최종 삽입 대입을 측정합니다.
-- Cocktail shaker sort는 하나의 swap을 세 번의 대입으로 측정합니다.
-- Counting sort는 정렬 결과를 원래 배열로 복사하는 과정에서 각 원소를 한 번씩 측정합니다.
-
-따라서 `n=2,000`인 현재 실험에서는:
 
 | 입력 | 셸 정렬 | 카운팅 | 칵테일 셰이커 |
 |---|---:|---:|---:|
@@ -554,15 +802,21 @@ Counting sort는 비교 기반 정렬이 아니며, 현재 구현에서는 min/m
 | reverse | 20,644 | 2,000 | 5,997,000 |
 | duplicates | 3,025 | 2,000 | 1,998,999 |
 
-Counting sort에서는 최종 결과를 원래 배열에 복사하는 과정만 `moves`에 포함하므로 입력 형태와 관계없이 2,000으로 기록됩니다.
+**분석:**
+- 셸 정렬: sorted에서 0 (이미 정렬됨), reverse에서 최대
+- 카운팅 정렬: 모든 입력에서 2,000 (복사만 수행)
+- 칵테일 셰이커: sorted에서 0, reverse에서 최악 (5,997,000)
 
-#### 5.2.6 입력 크기 증가에 따른 시간 변화
+#### 5.2.4 입력 크기 증가에 따른 시간 변화
 
 ![입력 크기별 실행 시간](scale-time.svg)
 
-입력 크기를 128, 256, 512, 1024, 2048로 증가시키면서 실행 시간의 변화를 측정하였습니다. Shell sort와 Cocktail shaker sort는 입력 크기에 따라 비교 기반 정렬 비용이 증가하며, Counting sort는 입력 값의 범위가 고정되어 있을 때 `n` 증가에 대해 선형적인 성분을 가집니다.
+입력 크기를 128, 256, 512, 1024, 2048로 증가시키면서 실행 시간의 변화를 측정하였습니다. random 입력으로 각 크기에 대해 세 알고리즘을 실행한 결과:
 
-구체적인 실행 시간은 `report/results.csv`의 측정값과 `scale-time.svg`를 기준으로 해석하였습니다.
+**결과 분석:**
+- **Shell sort**: 거의 선형에 가까운 증가 (n이 2배 → 시간 약 2배)
+- **Counting sort**: 거의 일정한 시간 (값 범위가 고정이므로)
+- **Cocktail shaker**: 이차적 증가 (n이 2배 → 시간 약 4배)
 
 ---
 
@@ -578,21 +832,21 @@ Counting sort에서는 최종 결과를 원래 배열에 복사하는 과정만 
 
 ### 6.2 실험 결과 해석
 
-- 셸 정렬은 큰 gap으로 빠르게 정리하고 점점 미세하게 보정하는 방식이라 무작위 입력에서 비교적 안정적인 성능을 보입니다.
-- 카운팅 정렬은 값 범위가 작을 때 매우 강력하지만, 값 범위가 커지면 메모리 사용량과 비용이 급증합니다.
-- 칵테일 셰이커 정렬은 구현이 간단하고, 특정 입력 형태에서는 어느 정도 효율적이지만, 전체적으로는 `O(n²)` 구조를 벗어나기 어렵습니다.
+- **셸 정렬**: 큰 gap으로 빠르게 정리하고 점점 미세하게 보정하는 방식이라 무작위 입력에서 비교적 안정적인 성능을 보입니다.
+- **카운팅 정렬**: 값 범위가 작을 때 매우 강력합니다. 본 실험에서는 값의 범위가 고정(`[-500, 500)`)이므로 입력 크기 증가에도 거의 선형 성능을 유지합니다.
+- **칵테일 셰이커 정렬**: 구현이 간단하고, sorted 입력에서는 효율적이지만, reverse와 random 입력에서는 `O(n²)` 구조 때문에 매우 느립니다.
 
-따라서 정렬 알고리즘을 선택할 때는 한 번에 가장 빠른 알고리즘을 고르기보다, 입력 데이터의 범위와 분포에 따라 상황에 맞는 최적의 알고리즘을 선택해야 합니다.
+### 6.3 언어 간 성능 비교
 
-C와 Python은 동일한 알고리즘을 구현하더라도 실행 모델과 런타임 오버헤드가 다르기 때문에 실행 시간이 다르게 나타날 수 있습니다. 따라서 언어 간 절대적인 실행 시간 차이보다는 동일한 언어와 동일한 환경에서 알고리즘별 상대적인 성능 차이를 중심으로 해석해야 합니다.
+C와 Python은 동일한 알고리즘을 구현하더라도 실행 모델과 런타임 오버헤드가 다르기 때문에 실행 시간이 다르게 나타날 수 있습니다. 따라서 **언어 간 절대적인 실행 시간 차이보다는 동일한 언어와 동일한 환경에서 알고리즘별 상대적인 성능 차이를 중심으로 해석**해야 합니다.
 
 ---
 
 ## 7. 결론
 
-- 셸 정렬은 gap을 이용하여 먼 위치의 원소를 먼저 정리한 뒤 점차 간격을 줄이는 구조를 사용합니다.
-- 카운팅 정렬은 입력 값의 범위 `k = max - min + 1`이 충분히 작을 경우 `O(n+k)`의 시간 복잡도를 달성할 수 있습니다.
-- 칵테일 셰이커 정렬은 양방향 pass와 조기 종료를 사용하지만 평균 및 최악의 시간 복잡도는 `O(n²)`이므로 입력 크기가 증가할수록 비교 기반 단순 정렬의 비용이 커집니다.
+- **셸 정렬**은 gap을 이용하여 먼 위치의 원소를 먼저 정리한 뒤 점차 간격을 줄이는 구조를 사용합니다.
+- **카운팅 정렬**은 입력 값의 범위 `k = max - min + 1`이 충분히 작을 경우 `O(n+k)`의 시간 복잡도를 달성할 수 있으며, 안정성까지 보장합니다.
+- **칵테일 셰이커 정렬**은 양방향 pass와 조기 종료를 사용하지만 평균 및 최악의 시간 복잡도는 `O(n²)`이므로, 입력 크기가 증가할수록 비교 기반 단순 정렬의 비용이 커집니다.
 
 이번 보고서에서는 세 가지 정렬 알고리즘의 원리, 구현, 실험 절차, 시각화 결과를 정리하였습니다. 이를 통해 알고리즘의 이론적 특성과 실제 성능이 입력 데이터와 구현 방식에 따라 어떻게 나타나는지를 관찰했습니다.
 
