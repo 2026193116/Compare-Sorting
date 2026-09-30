@@ -1,417 +1,1118 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <title>Sorting Visualizer</title>
-  <style>
-    body {
-      font: 16px sans-serif;
-      max-width: 900px;
-      margin: 2em auto;
-      padding: 0 1em;
-    }
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <title>Sorting Algorithm Visualization</title>
 
-    button {
-      margin: 0.3em;
-      padding: 0.6em 1em;
-      cursor: pointer;
-    }
+    <style>
+        :root {
+            --border: #cfd4da;
+            --text: #222;
+            --muted: #666;
+            --background: #f7f8fa;
+            --panel: #ffffff;
+            --primary: #4e79a7;
+            --secondary: #59a14f;
+            --accent: #e15759;
+            --active: #f4b183;
+            --fixed: #d9d9d9;
+        }
 
-    #array {
-      display: flex;
-      gap: 4px;
-      align-items: end;
-      height: 260px;
-      margin-top: 1.5em;
-    }
+        * {
+            box-sizing: border-box;
+        }
 
-    i {
-      display: block;
-      background: #4e79a7;
-      width: 28px;
-      text-align: center;
-      color: white;
-      font-style: normal;
-    }
+        body {
+            margin: 0;
+            padding: 32px 20px 48px;
+            background: var(--background);
+            color: var(--text);
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+        }
 
-    p {
-      line-height: 1.5;
-    }
-  </style>
+        main {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        h3 {
+            margin: 0 0 10px;
+            font-size: 16px;
+        }
+
+        p {
+            line-height: 1.6;
+        }
+
+        .intro {
+            margin: 0 0 22px;
+            color: var(--muted);
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        button {
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 9px 14px;
+            background: white;
+            color: var(--text);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #f0f2f5;
+        }
+
+        button.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        button.reset {
+            background: #333;
+            border-color: #333;
+            color: white;
+        }
+
+        .panel {
+            margin-bottom: 16px;
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--panel);
+        }
+
+        .status-box {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 8px;
+        }
+
+        .status-title {
+            font-weight: 700;
+        }
+
+        .status-detail {
+            color: var(--muted);
+            min-height: 24px;
+        }
+
+        .array-title-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .array-note {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .array {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: flex-end;
+            min-height: 64px;
+        }
+
+        .item {
+            min-width: 50px;
+            padding: 11px 8px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            background: white;
+            text-align: center;
+            font-weight: 600;
+            transition:
+                transform 0.12s ease,
+                background 0.12s ease,
+                border-color 0.12s ease;
+        }
+
+        .item.active {
+            background: var(--active);
+            border-color: #d98f3f;
+            transform: translateY(-2px);
+        }
+
+        .item.fixed {
+            background: var(--fixed);
+            color: #555;
+        }
+
+        .item.empty {
+            color: #aaa;
+            font-weight: 400;
+            background: #fafafa;
+        }
+
+        .item-index {
+            display: block;
+            margin-top: 4px;
+            font-size: 10px;
+            font-weight: 400;
+            color: #777;
+        }
+
+        .subsection {
+            margin-top: 22px;
+        }
+
+        .subsection:first-child {
+            margin-top: 0;
+        }
+
+        .count-grid,
+        .output-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .count-item,
+        .output-item {
+            min-width: 58px;
+            padding: 8px 6px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            background: white;
+            text-align: center;
+        }
+
+        .count-item .key {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .count-item .value {
+            font-size: 15px;
+        }
+
+        .output-item.empty {
+            color: #aaa;
+            background: #fafafa;
+        }
+
+        .algorithm-info {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-left: 4px solid var(--primary);
+            background: #f4f6f9;
+            line-height: 1.6;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-box {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+            background: white;
+        }
+
+        .legend-box.active {
+            background: var(--active);
+            border-color: #d98f3f;
+        }
+
+        .legend-box.fixed {
+            background: var(--fixed);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        code {
+            padding: 2px 5px;
+            border-radius: 4px;
+            background: #eef0f2;
+            font-family: Consolas, monospace;
+        }
+
+        @media (max-width: 680px) {
+            body {
+                padding: 20px 12px 32px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .item {
+                min-width: 44px;
+            }
+        }
+    </style>
 </head>
 
 <body>
-  <h1>정렬 과정 시각화</h1>
+<main>
+    <h1>정렬 과정 시각화</h1>
 
-  <p>
-    한 번의 "다음 단계"는 각 알고리즘의 실제 핵심 단계를
-    수행한다.
-  </p>
+    <p class="intro">
+        각 정렬 알고리즘의 핵심 연산을 한 단계씩 확인할 수 있다.
+        버튼으로 알고리즘을 선택한 뒤
+        <strong>다음 단계</strong>를 눌러 정렬 과정을 확인한다.
+    </p>
 
-  <button onclick="start('shell')">
-    셸 정렬
-  </button>
+    <section class="panel">
+        <div class="controls">
+            <button
+                class="primary"
+                type="button"
+                onclick="start('shell')"
+            >
+                셸 정렬
+            </button>
 
-  <button onclick="start('counting')">
-    카운팅 정렬
-  </button>
+            <button
+                class="primary"
+                type="button"
+                onclick="start('counting')"
+            >
+                카운팅 정렬
+            </button>
 
-  <button onclick="start('cocktail')">
-    칵테일 셰이커
-  </button>
+            <button
+                class="primary"
+                type="button"
+                onclick="start('cocktail')"
+            >
+                칵테일 셰이커 정렬
+            </button>
 
-  <button onclick="step()">
-    다음 단계
-  </button>
+            <button
+                class="primary"
+                type="button"
+                onclick="step()"
+            >
+                다음 단계
+            </button>
 
-  <div id="array"></div>
-  <p id="note"></p>
+            <button
+                class="reset"
+                type="button"
+                onclick="resetVisualization()"
+            >
+                처음으로
+            </button>
+        </div>
+    </section>
 
-  <script>
-    const INITIAL = [7, 2, 6, 1, 5, 3, 4];
+    <section class="panel">
+        <div class="status-box">
+            <div id="statusTitle" class="status-title">
+                알고리즘을 선택하세요.
+            </div>
+
+            <div id="statusDetail" class="status-detail">
+                아직 실행이 시작되지 않았습니다.
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="array-title-row">
+            <h2>현재 배열</h2>
+            <div id="arrayNote" class="array-note">
+                초기 입력
+            </div>
+        </div>
+
+        <div id="array" class="array"></div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <span class="legend-box active"></span>
+                현재 처리 중인 원소
+            </div>
+
+            <div class="legend-item">
+                <span class="legend-box fixed"></span>
+                이미 정렬된 영역
+            </div>
+        </div>
+    </section>
+
+    <section
+        id="countSection"
+        class="panel hidden"
+    >
+        <div class="subsection">
+            <h2>Count array</h2>
+            <p class="array-note">
+                각 값의 빈도 또는 누적 위치를 나타낸다.
+            </p>
+
+            <div id="counts" class="count-grid"></div>
+        </div>
+
+        <div class="subsection">
+            <h2>Output array</h2>
+            <p class="array-note">
+                Counting sort가 최종 결과를 배치하는 배열이다.
+            </p>
+
+            <div id="output" class="output-grid"></div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>알고리즘 설명</h2>
+
+        <div id="algorithmInfo" class="algorithm-info">
+            알고리즘을 선택하면 해당 알고리즘의 핵심 구조가 표시됩니다.
+        </div>
+    </section>
+</main>
+
+<script>
+    /*
+     * Visualization input.
+     *
+     * Negative values are included so that the offset
+     * idea of Counting Sort can also be observed.
+     */
+    const INITIAL = [
+        3, -1, 4, 0, -1, 2, 3
+    ];
 
     const arrayElement =
-      document.getElementById("array");
+        document.getElementById("array");
 
-    const noteElement =
-      document.getElementById("note");
+    const countsElement =
+        document.getElementById("counts");
 
-    let array = [];
+    const outputElement =
+        document.getElementById("output");
+
+    const countSection =
+        document.getElementById("countSection");
+
+    const statusTitle =
+        document.getElementById("statusTitle");
+
+    const statusDetail =
+        document.getElementById("statusDetail");
+
+    const arrayNote =
+        document.getElementById("arrayNote");
+
+    const algorithmInfo =
+        document.getElementById("algorithmInfo");
+
+    let array = INITIAL.slice();
     let state = null;
 
-    function draw() {
-      arrayElement.innerHTML = array
-        .map((value) => {
-          if (value === null) {
-            return '<i style="height:8px"></i>';
-          }
-
-          const height = Math.max(
-            8,
-            value * 12
-          );
-
-          return (
-            `<i style="height:${height}px">` +
-            `${value}` +
-            `</i>`
-          );
-        })
-        .join("");
+    function setStatus(title, detail) {
+        statusTitle.textContent = title;
+        statusDetail.textContent = detail;
     }
 
-    function finish(message) {
-      state.done = true;
-      noteElement.textContent = message;
-      draw();
+    function algorithmDescription(mode) {
+        if (mode === "shell") {
+            return (
+                "<strong>셸 정렬</strong>은 " +
+                "일반 삽입 정렬에 gap을 도입하여 " +
+                "먼 위치의 원소를 먼저 정리한 뒤, " +
+                "gap을 줄여가며 최종적으로 gap=1인 " +
+                "삽입 정렬을 수행한다."
+            );
+        }
+
+        if (mode === "counting") {
+            return (
+                "<strong>카운팅 정렬</strong>은 입력값의 " +
+                "빈도를 count array에 기록한 뒤, " +
+                "누적합을 계산하고 output array에 " +
+                "원소를 배치한다. 현재 시각화에서는 " +
+                "min을 기준으로 offset을 적용하여 " +
+                "음수도 처리할 수 있도록 구성하였다."
+            );
+        }
+
+        if (mode === "cocktail") {
+            return (
+                "<strong>칵테일 셰이커 정렬</strong>은 " +
+                "왼쪽에서 오른쪽으로 한 번, " +
+                "오른쪽에서 왼쪽으로 한 번 순회한다. " +
+                "앞 방향 pass에서는 큰 값이 오른쪽으로, " +
+                "뒤 방향 pass에서는 작은 값이 왼쪽으로 이동한다."
+            );
+        }
+
+        return "알고리즘을 선택하세요.";
     }
 
     function start(mode) {
-      array = INITIAL.slice();
+        array = INITIAL.slice();
 
-      state = {
-        mode,
-        done: false,
+        state = {
+            mode,
+            done: false,
 
-        /* Shell */
-        gap: 0,
-        shellIndex: 0,
+            /* Shell Sort */
+            gap: Math.max(
+                1,
+                Math.floor(array.length / 4)
+            ),
+            shellIndex: 0,
 
-        /* Counting */
-        source: null,
-        minimum: 0,
-        maximum: 0,
-        counts: null,
-        output: null,
-        countIndex: 0,
-        outputIndex: 0,
+            /* Counting Sort */
+            source: null,
+            minimum: null,
+            maximum: null,
+            counts: null,
+            output: null,
+            countIndex: 0,
+            prefixIndex: 1,
+            outputIndex: -1,
+            countingStage: "count",
 
-        /* Cocktail */
-        left: 0,
-        right: array.length - 1,
-      };
+            /* Cocktail Shaker Sort */
+            left: 0,
+            right: array.length - 1,
+            phase: "forward"
+        };
 
-      if (mode === "shell") {
-        state.gap = Math.max(
-          1,
-          Math.floor(array.length / 4)
+        if (mode === "shell") {
+            state.shellIndex = state.gap;
+
+            countSection.classList.add("hidden");
+
+            algorithmInfo.innerHTML =
+                algorithmDescription(mode);
+
+            setStatus(
+                "셸 정렬",
+                `현재 gap = ${state.gap}`
+            );
+
+            arrayNote.textContent =
+                `gap=${state.gap}에서 삽입 정렬을 수행합니다.`;
+        }
+
+        if (mode === "counting") {
+            state.source = array.slice();
+            state.minimum =
+                Math.min(...state.source);
+            state.maximum =
+                Math.max(...state.source);
+
+            const range =
+                state.maximum -
+                state.minimum +
+                1;
+
+            state.counts =
+                new Array(range).fill(0);
+
+            state.output =
+                new Array(array.length).fill(null);
+
+            state.countIndex = 0;
+            state.prefixIndex = 1;
+            state.outputIndex = -1;
+            state.countingStage = "count";
+
+            countSection.classList.remove("hidden");
+
+            algorithmInfo.innerHTML =
+                algorithmDescription(mode);
+
+            setStatus(
+                "카운팅 정렬",
+                `min=${state.minimum}, ` +
+                `max=${state.maximum}, ` +
+                `range=${range}`
+            );
+
+            arrayNote.textContent =
+                "① 빈도 계산 단계";
+
+            drawCounts();
+            drawOutput();
+        }
+
+        if (mode === "cocktail") {
+            countSection.classList.add("hidden");
+
+            algorithmInfo.innerHTML =
+                algorithmDescription(mode);
+
+            setStatus(
+                "칵테일 셰이커 정렬",
+                "Forward pass 준비"
+            );
+
+            arrayNote.textContent =
+                "왼쪽 → 오른쪽으로 큰 값을 이동합니다.";
+        }
+
+        draw();
+    }
+
+    function resetVisualization() {
+        array = INITIAL.slice();
+        state = null;
+
+        countSection.classList.add("hidden");
+
+        setStatus(
+            "알고리즘을 선택하세요.",
+            "아직 실행이 시작되지 않았습니다."
         );
-        state.shellIndex = state.gap;
 
-        noteElement.textContent =
-          `Shell sort 시작: gap=${state.gap}`;
-      }
+        arrayNote.textContent =
+            "초기 입력";
 
-      if (mode === "counting") {
-        state.source = array.slice();
-        state.minimum = Math.min(...array);
-        state.maximum = Math.max(...array);
+        algorithmInfo.textContent =
+            "알고리즘을 선택하면 해당 알고리즘의 핵심 구조가 표시됩니다.";
 
-        state.counts = new Array(
-          state.maximum - state.minimum + 1
-        ).fill(0);
+        draw();
+        drawCounts();
+        drawOutput();
+    }
 
-        state.output = new Array(
-          array.length
-        ).fill(null);
+    function finish(message) {
+        if (!state) {
+            return;
+        }
 
-        state.countIndex = 0;
+        state.done = true;
 
-        noteElement.textContent =
-          `Counting sort: 범위 ` +
-          `${state.minimum} ~ ${state.maximum}`;
-      }
+        setStatus(
+            state.mode === "shell"
+                ? "셸 정렬 완료"
+                : state.mode === "counting"
+                    ? "카운팅 정렬 완료"
+                    : "칵테일 셰이커 정렬 완료",
+            message
+        );
 
-      if (mode === "cocktail") {
-        state.left = 0;
-        state.right = array.length - 1;
-        state.phase = "forward";
+        arrayNote.textContent =
+            "정렬이 완료되었습니다.";
 
-        noteElement.textContent =
-          "Cocktail shaker sort 시작";
-      }
+        draw();
+        drawCounts();
+        drawOutput();
+    }
 
-      draw();
+    function draw() {
+        const mode =
+            state ? state.mode : null;
+
+        arrayElement.innerHTML =
+            array.map((value, index) => {
+                let className = "item";
+
+                if (mode === "shell") {
+                    if (
+                        !state.done &&
+                        index === state.shellIndex
+                    ) {
+                        className += " active";
+                    }
+                }
+
+                if (mode === "cocktail") {
+                    const inActiveRange =
+                        index >= state.left &&
+                        index <= state.right;
+
+                    if (!inActiveRange) {
+                        className += " fixed";
+                    } else if (
+                        !state.done &&
+                        state.phase === "forward"
+                    ) {
+                        className += " active";
+                    }
+                }
+
+                return (
+                    `<div class="${className}">` +
+                    `${value}` +
+                    `<span class="item-index">` +
+                    `${index}` +
+                    `</span>` +
+                    `</div>`
+                );
+            })
+            .join("");
+    }
+
+    function drawCounts() {
+        if (
+            !state ||
+            state.mode !== "counting" ||
+            !state.counts
+        ) {
+            countsElement.innerHTML = "";
+            return;
+        }
+
+        countsElement.innerHTML =
+            state.counts
+                .map((value, index) => {
+                    const actualValue =
+                        index + state.minimum;
+
+                    return (
+                        `<div class="count-item">` +
+                        `<span class="key">` +
+                        `${actualValue}` +
+                        `</span>` +
+                        `<span class="value">` +
+                        `${value}` +
+                        `</span>` +
+                        `</div>`
+                    );
+                })
+                .join("");
+    }
+
+    function drawOutput() {
+        if (
+            !state ||
+            state.mode !== "counting" ||
+            !state.output
+        ) {
+            outputElement.innerHTML = "";
+            return;
+        }
+
+        outputElement.innerHTML =
+            state.output
+                .map((value, index) => {
+                    const isEmpty =
+                        value === null;
+
+                    return (
+                        `<div class="output-item` +
+                        `${isEmpty ? " empty" : ""}">` +
+                        `${isEmpty ? "·" : value}` +
+                        `<div class="item-index">` +
+                        `${index}` +
+                        `</div>` +
+                        `</div>`
+                    );
+                })
+                .join("");
     }
 
     function shellStep() {
-      if (state.shellIndex >= array.length) {
-        state.gap = Math.floor(state.gap / 2);
+        if (state.shellIndex >= array.length) {
+            const nextGap =
+                Math.floor(state.gap / 2);
 
-        if (state.gap === 0) {
-          finish("Shell sort 완료");
-          return;
+            if (nextGap === 0) {
+                finish(
+                    "gap=1 단계까지 완료하여 정렬이 끝났습니다."
+                );
+                return;
+            }
+
+            state.gap = nextGap;
+            state.shellIndex = state.gap;
+
+            setStatus(
+                "셸 정렬",
+                `다음 gap=${state.gap}`
+            );
+
+            arrayNote.textContent =
+                `gap=${state.gap} 단계로 이동합니다.`;
+
+            draw();
+            return;
         }
 
-        state.shellIndex = state.gap;
+        const index =
+            state.shellIndex;
 
-        noteElement.textContent =
-          `다음 gap=${state.gap}`;
+        const value =
+            array[index];
+
+        let position =
+            index;
+
+        while (
+            position >= state.gap &&
+            array[position - state.gap] > value
+        ) {
+            array[position] =
+                array[position - state.gap];
+
+            position -= state.gap;
+        }
+
+        array[position] = value;
+
+        setStatus(
+            "셸 정렬",
+            `gap=${state.gap}, ` +
+            `index=${index} 원소를 삽입했습니다.`
+        );
+
+        arrayNote.textContent =
+            `현재 gap = ${state.gap}`;
+
+        state.shellIndex += 1;
 
         draw();
-        return;
-      }
-
-      const index = state.shellIndex;
-      const value = array[index];
-      let position = index;
-
-      while (
-        position >= state.gap &&
-        array[position - state.gap] > value
-      ) {
-        array[position] =
-          array[position - state.gap];
-
-        position -= state.gap;
-      }
-
-      array[position] = value;
-
-      noteElement.textContent =
-        `gap=${state.gap}, ` +
-        `index=${index} 삽입 완료`;
-
-      state.shellIndex += 1;
-
-      draw();
     }
 
     function countingStep() {
-      if (state.countIndex < state.source.length) {
-        const value =
-          state.source[state.countIndex];
+        const stage =
+            state.countingStage;
 
-        state.counts[
-          value - state.minimum
-        ] += 1;
+        /*
+         * Stage 1:
+         * Count frequency of each value.
+         */
+        if (stage === "count") {
+            if (
+                state.countIndex <
+                state.source.length
+            ) {
+                const value =
+                    state.source[
+                        state.countIndex
+                    ];
 
-        noteElement.textContent =
-          `빈도 계산: value=${value}`;
+                const offset =
+                    value - state.minimum;
 
-        state.countIndex += 1;
-        draw();
-        return;
-      }
+                state.counts[offset] += 1;
 
-      if (
-        state.countIndex === state.source.length
-        && !state.prefixDone
-      ) {
-        state.prefixDone = true;
-        state.prefixIndex = 1;
+                setStatus(
+                    "카운팅 정렬 · ① 빈도 계산",
+                    `value=${value}, ` +
+                    `count[${value}]=` +
+                    `${state.counts[offset]}`
+                );
 
-        noteElement.textContent =
-          "누적합 계산 시작";
+                arrayNote.textContent =
+                    "입력 배열의 각 값이 몇 번 등장하는지 계산합니다.";
 
-        return;
-      }
+                state.countIndex += 1;
 
-      if (
-        state.prefixDone &&
-        state.prefixIndex <
-          state.counts.length
-      ) {
-        const index = state.prefixIndex;
+                drawCounts();
+                return;
+            }
 
-        state.counts[index] +=
-          state.counts[index - 1];
+            state.countingStage =
+                "prefix";
 
-        state.prefixIndex += 1;
+            state.prefixIndex = 1;
 
-        noteElement.textContent =
-          `누적합: count[${index}]`;
+            setStatus(
+                "카운팅 정렬 · ② 누적합",
+                "빈도 배열의 누적합 계산을 시작합니다."
+            );
 
-        return;
-      }
+            arrayNote.textContent =
+                "각 값의 최종 위치 범위를 계산합니다.";
 
-      if (
-        state.prefixDone &&
-        state.prefixIndex >= state.counts.length
-        && state.outputIndex === 0
-      ) {
-        state.outputIndex =
-          state.source.length - 1;
+            drawCounts();
+            return;
+        }
 
-        noteElement.textContent =
-          "출력 배열에 배치 시작";
+        /*
+         * Stage 2:
+         * Convert counts into cumulative counts.
+         */
+        if (stage === "prefix") {
+            if (
+                state.prefixIndex <
+                state.counts.length
+            ) {
+                const index =
+                    state.prefixIndex;
 
-        array = state.output.slice();
-        draw();
-        return;
-      }
+                state.counts[index] +=
+                    state.counts[index - 1];
 
-      if (state.outputIndex >= 0) {
-        const index =
-          state.outputIndex;
+                const actualValue =
+                    index + state.minimum;
 
-        const value =
-          state.source[index];
+                setStatus(
+                    "카운팅 정렬 · ② 누적합",
+                    `value=${actualValue}, ` +
+                    `cumulative count=` +
+                    `${state.counts[index]}`
+                );
 
-        const offset =
-          value - state.minimum;
+                arrayNote.textContent =
+                    "누적합은 각 값이 output에서 차지할 마지막 위치를 결정합니다.";
 
-        state.counts[offset] -= 1;
+                state.prefixIndex += 1;
 
-        const position =
-          state.counts[offset];
+                drawCounts();
+                return;
+            }
 
-        state.output[position] = value;
+            state.countingStage =
+                "place";
 
-        array = state.output.slice();
+            state.outputIndex =
+                state.source.length - 1;
 
-        noteElement.textContent =
-          `output[${position}] = ${value}`;
+            setStatus(
+                "카운팅 정렬 · ③ Output 배치",
+                "입력 배열을 오른쪽에서 왼쪽으로 순회합니다."
+            );
 
-        state.outputIndex -= 1;
+            arrayNote.textContent =
+                "안정성을 위해 입력 배열의 뒤쪽 원소부터 배치합니다.";
 
-        draw();
-        return;
-      }
+            drawCounts();
+            drawOutput();
+            return;
+        }
 
-      finish("Counting sort 완료");
+        /*
+         * Stage 3:
+         * Place values into the output array
+         * from right to left.
+         */
+        if (stage === "place") {
+            if (state.outputIndex >= 0) {
+                const sourceIndex =
+                    state.outputIndex;
+
+                const value =
+                    state.source[sourceIndex];
+
+                const offset =
+                    value - state.minimum;
+
+                state.counts[offset] -= 1;
+
+                const position =
+                    state.counts[offset];
+
+                state.output[position] =
+                    value;
+
+                setStatus(
+                    "카운팅 정렬 · ③ Output 배치",
+                    `value=${value} → ` +
+                    `output[${position}]`
+                );
+
+                arrayNote.textContent =
+                    `입력 index=${sourceIndex}의 값을 배치했습니다.`;
+
+                state.outputIndex -= 1;
+
+                drawCounts();
+                drawOutput();
+                return;
+            }
+
+            array =
+                state.output.slice();
+
+            finish(
+                "Count → 누적합 → Output 배치가 모두 완료되었습니다."
+            );
+
+            drawCounts();
+            drawOutput();
+        }
     }
 
     function cocktailStep() {
-      if (state.left >= state.right) {
-        finish("Cocktail shaker sort 완료");
-        return;
-      }
-
-      let swapped = false;
-
-      if (state.phase === "forward") {
-        for (
-          let index = state.left;
-          index < state.right;
-          index++
-        ) {
-          if (
-            array[index] >
-            array[index + 1]
-          ) {
-            [
-              array[index],
-              array[index + 1]
-            ] = [
-              array[index + 1],
-              array[index]
-            ];
-
-            swapped = true;
-          }
-        }
-
-        if (!swapped) {
-          finish(
-            "forward pass에서 교환이 없어 완료"
-          );
-          return;
-        }
-
-        state.right -= 1;
-        state.phase = "backward";
-
-        noteElement.textContent =
-          "왼쪽 → 오른쪽 pass 완료";
-
-        draw();
-        return;
-      }
-
-      swapped = false;
-
-      for (
-        let index = state.right;
-        index > state.left;
-        index--
-      ) {
         if (
-          array[index - 1] >
-          array[index]
+            state.left >= state.right
         ) {
-          [
-            array[index - 1],
-            array[index]
-          ] = [
-            array[index],
-            array[index - 1]
-          ];
-
-          swapped = true;
+            finish(
+                "더 이상 처리할 구간이 없어 정렬이 완료되었습니다."
+            );
+            return;
         }
-      }
 
-      state.left += 1;
+        /*
+         * Forward pass:
+         * Move larger values toward the right.
+         */
+        if (state.phase === "forward") {
+            let swapped = false;
 
-      if (!swapped) {
-        finish(
-          "backward pass에서 교환이 없어 완료"
-        );
-        return;
-      }
+            for (
+                let index = state.left;
+                index < state.right;
+                index++
+            ) {
+                if (
+                    array[index] >
+                    array[index + 1]
+                ) {
+                    [
+                        array[index],
+                        array[index + 1]
+                    ] = [
+                        array[index + 1],
+                        array[index]
+                    ];
 
-      state.phase = "forward";
+                    swapped = true;
+                }
+            }
 
-      noteElement.textContent =
-        "오른쪽 → 왼쪽 pass 완료";
+            if (!swapped) {
+                finish(
+                    "Forward pass에서 교환이 없어 이미 정렬된 상태입니다."
+                );
+                return;
+            }
 
-      draw();
+            state.right -= 1;
+            state.phase = "backward";
+
+            setStatus(
+                "칵테일 셰이커 정렬 · Forward pass",
+                `큰 값이 오른쪽으로 이동했습니다. ` +
+                `현재 right=${state.right}`
+            );
+
+            arrayNote.textContent =
+                `왼쪽 → 오른쪽: 큰 값을 오른쪽으로 이동`;
+
+            draw();
+            return;
+        }
+
+        /*
+         * Backward pass:
+         * Move smaller values toward the left.
+         */
+        if (state.phase === "backward") {
+            let swapped = false;
+
+            for (
+                let index = state.right;
+                index > state.left;
+                index--
+            ) {
+                if (
+                    array[index - 1] >
+                    array[index]
+                ) {
+                    [
+                        array[index - 1],
+                        array[index]
+                    ] = [
+                        array[index],
+                        array[index - 1]
+                    ];
+
+                    swapped = true;
+                }
+            }
+
+            if (!swapped) {
+                finish(
+                    "Backward pass에서 교환이 없어 이미 정렬된 상태입니다."
+                );
+                return;
+            }
+
+            state.left += 1;
+            state.phase = "forward";
+
+            setStatus(
+                "칵테일 셰이커 정렬 · Backward pass",
+                `작은 값이 왼쪽으로 이동했습니다. ` +
+                `현재 left=${state.left}`
+            );
+
+            arrayNote.textContent =
+                `오른쪽 → 왼쪽: 작은 값을 왼쪽으로 이동`;
+
+            draw();
+        }
     }
 
     function step() {
-      if (!state || state.done) {
-        return;
-      }
+        if (!state) {
+            setStatus(
+                "알고리즘을 먼저 선택하세요.",
+                "셸 정렬, 카운팅 정렬 또는 칵테일 셰이커 정렬을 선택해 주세요."
+            );
+            return;
+        }
 
-      if (state.mode === "shell") {
-        shellStep();
-      } else if (state.mode === "counting") {
-        countingStep();
-      } else if (state.mode === "cocktail") {
-        cocktailStep();
-      }
+        if (state.done) {
+            return;
+        }
+
+        if (state.mode === "shell") {
+            shellStep();
+            return;
+        }
+
+        if (state.mode === "counting") {
+            countingStep();
+            return;
+        }
+
+        if (state.mode === "cocktail") {
+            cocktailStep();
+        }
     }
-  </script>
+
+    resetVisualization();
+</script>
 </body>
 </html>
