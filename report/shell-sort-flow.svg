@@ -1,508 +1,271 @@
 <svg xmlns="http://www.w3.org/2000/svg"
-     width="1400"
+     width="1500"
      height="2050"
-     viewBox="0 0 1400 2050">
+     viewBox="0 0 1500 2050">
 
   <defs>
-    <marker id="arrow" markerWidth="11" markerHeight="11"
-            refX="10" refY="5.5" orient="auto"
-            markerUnits="strokeWidth">
+    <marker id="arrow" markerWidth="11" markerHeight="11" refX="10" refY="5.5"
+            orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L11,5.5 L0,11 Z" fill="#374151"/>
     </marker>
-
-    <marker id="arrowBlue" markerWidth="11" markerHeight="11"
-            refX="10" refY="5.5" orient="auto"
-            markerUnits="strokeWidth">
+    <marker id="arrowBlue" markerWidth="11" markerHeight="11" refX="10" refY="5.5"
+            orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L11,5.5 L0,11 Z" fill="#2563eb"/>
     </marker>
-
-    <marker id="arrowGreen" markerWidth="11" markerHeight="11"
-            refX="10" refY="5.5" orient="auto"
-            markerUnits="strokeWidth">
+    <marker id="arrowGreen" markerWidth="11" markerHeight="11" refX="10" refY="5.5"
+            orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L11,5.5 L0,11 Z" fill="#059669"/>
     </marker>
-
-    <marker id="arrowOrange" markerWidth="11" markerHeight="11"
-            refX="10" refY="5.5" orient="auto"
-            markerUnits="strokeWidth">
+    <marker id="arrowOrange" markerWidth="11" markerHeight="11" refX="10" refY="5.5"
+            orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L11,5.5 L0,11 Z" fill="#d97706"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="11" markerHeight="11" refX="10" refY="5.5"
+            orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L11,5.5 L0,11 Z" fill="#7c3aed"/>
     </marker>
 
     <style>
-      .title {
-        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
-        font-size: 34px;
-        font-weight: 700;
-        fill: #111827;
-      }
-
-      .subtitle {
-        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
-        font-size: 17px;
-        fill: #6b7280;
-      }
-
-      .text {
-        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
-        font-size: 19px;
-        fill: #111827;
-        text-anchor: middle;
-      }
-
-      .small {
-        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
-        font-size: 15.5px;
-        fill: #4b5563;
-        text-anchor: middle;
-      }
-
-      .label {
-        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
-        font-size: 16px;
-        font-weight: 600;
-        fill: #374151;
-      }
-
-      .code {
-        font-family: "Consolas", "D2Coding", monospace;
-        font-size: 16px;
-        fill: #374151;
-        text-anchor: middle;
-      }
-
-      .sectionBlue {
-        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
-        font-size: 18px;
-        font-weight: 700;
-        fill: #1d4ed8;
-        text-anchor: middle;
-      }
-
-      .sectionGreen {
-        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
-        font-size: 18px;
-        font-weight: 700;
-        fill: #047857;
-        text-anchor: middle;
-      }
-
-      .sectionOrange {
-        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
-        font-size: 18px;
-        font-weight: 700;
-        fill: #b45309;
-        text-anchor: middle;
-      }
-
-      .decisionText {
-        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
-        font-size: 17px;
-        font-weight: 600;
-        fill: #92400e;
-        text-anchor: middle;
-      }
-
-      .noteTitle {
-        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
-        font-size: 17px;
-        font-weight: 700;
-        fill: #374151;
-      }
-
-      .noteText {
-        font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
-        font-size: 14.5px;
-        fill: #4b5563;
-      }
-
-      .box {
-        fill: #ffffff;
-        stroke: #374151;
-        stroke-width: 2;
-      }
-
-      .inputBox {
-        fill: #f9fafb;
-        stroke: #4b5563;
-        stroke-width: 2;
-      }
-
-      .gapBox {
-        fill: #eff6ff;
-        stroke: #2563eb;
-        stroke-width: 2.5;
-      }
-
-      .loopBox {
-        fill: #ecfdf5;
-        stroke: #059669;
-        stroke-width: 2.5;
-      }
-
-      .compareBox {
-        fill: #fff7ed;
-        stroke: #d97706;
-        stroke-width: 2.5;
-      }
-
-      .shiftBox {
-        fill: #f5f3ff;
-        stroke: #7c3aed;
-        stroke-width: 2.5;
-      }
-
-      .finish {
-        fill: #f3f4f6;
-        stroke: #374151;
-        stroke-width: 2;
-      }
-
-      .decision {
-        fill: #fffbeb;
-        stroke: #d97706;
-        stroke-width: 2;
-      }
-
-      .arrow {
-        stroke: #374151;
-        stroke-width: 2.5;
-        fill: none;
-        marker-end: url(#arrow);
-      }
-
-      .arrowBlue {
-        stroke: #2563eb;
-        stroke-width: 2.5;
-        fill: none;
-        marker-end: url(#arrowBlue);
-      }
-
-      .arrowGreen {
-        stroke: #059669;
-        stroke-width: 2.5;
-        fill: none;
-        marker-end: url(#arrowGreen);
-      }
-
-      .arrowOrange {
-        stroke: #d97706;
-        stroke-width: 2.5;
-        fill: none;
-        marker-end: url(#arrowOrange);
-      }
-
-      .loop {
-        stroke: #6b7280;
-        stroke-width: 2;
-        stroke-dasharray: 7 5;
-        fill: none;
-        marker-end: url(#arrow);
-      }
-
-      .noteBox {
-        fill: #fafafa;
-        stroke: #d1d5db;
-        stroke-width: 1.5;
-      }
+      .title { font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+               font-size:34px;font-weight:700;fill:#111827; }
+      .subtitle { font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+                  font-size:17px;fill:#6b7280; }
+      .text { font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+              font-size:18px;fill:#111827;text-anchor:middle; }
+      .small { font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+               font-size:14.5px;fill:#4b5563;text-anchor:middle; }
+      .label { font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+               font-size:15px;font-weight:600;fill:#374151; }
+      .code { font-family:"Consolas","D2Coding",monospace;
+              font-size:15.5px;fill:#374151;text-anchor:middle; }
+      .codeLeft { font-family:"Consolas","D2Coding",monospace;
+                  font-size:14px;fill:#374151; }
+      .sectionBlue { font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+                     font-size:18px;font-weight:700;fill:#1d4ed8;text-anchor:middle; }
+      .sectionGreen { font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+                      font-size:18px;font-weight:700;fill:#047857;text-anchor:middle; }
+      .sectionOrange { font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+                       font-size:18px;font-weight:700;fill:#b45309;text-anchor:middle; }
+      .sectionPurple { font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+                       font-size:18px;font-weight:700;fill:#6d28d9;text-anchor:middle; }
+      .decisionText { font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+                      font-size:16px;font-weight:600;fill:#92400e;text-anchor:middle; }
+      .noteTitle { font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+                   font-size:16px;font-weight:700;fill:#374151; }
+      .noteText { font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+                  font-size:13.5px;fill:#4b5563; }
+      .box { fill:#fff;stroke:#374151;stroke-width:2; }
+      .inputBox { fill:#f9fafb;stroke:#4b5563;stroke-width:2; }
+      .gapBox { fill:#eff6ff;stroke:#2563eb;stroke-width:2.5; }
+      .loopBox { fill:#ecfdf5;stroke:#059669;stroke-width:2.5; }
+      .compareBox { fill:#fff7ed;stroke:#d97706;stroke-width:2.5; }
+      .shiftBox { fill:#f5f3ff;stroke:#7c3aed;stroke-width:2.5; }
+      .finish { fill:#f3f4f6;stroke:#374151;stroke-width:2; }
+      .decision { fill:#fffbeb;stroke:#d97706;stroke-width:2; }
+      .sideBox { fill:#fafafa;stroke:#d1d5db;stroke-width:1.5; }
+      .nested { fill:none;stroke:#9ca3af;stroke-width:2;stroke-dasharray:7 5; }
+      .arrow { stroke:#374151;stroke-width:2.5;fill:none;marker-end:url(#arrow); }
+      .arrowBlue { stroke:#2563eb;stroke-width:2.5;fill:none;marker-end:url(#arrowBlue); }
+      .arrowGreen { stroke:#059669;stroke-width:2.5;fill:none;marker-end:url(#arrowGreen); }
+      .arrowOrange { stroke:#d97706;stroke-width:2.5;fill:none;marker-end:url(#arrowOrange); }
+      .arrowPurple { stroke:#7c3aed;stroke-width:2.5;fill:none;marker-end:url(#arrowPurple); }
+      .loop { stroke:#6b7280;stroke-width:2.2;stroke-dasharray:8 5;fill:none;marker-end:url(#arrow); }
     </style>
   </defs>
 
-  <!-- ===================================================== -->
-  <!-- Background -->
-  <!-- ===================================================== -->
+  <rect x="0" y="0" width="1500" height="2050" fill="#ffffff"/>
 
-  <rect x="0" y="0" width="1400" height="2050" fill="#ffffff"/>
-
-  <!-- ===================================================== -->
   <!-- Title -->
-  <!-- ===================================================== -->
-
-  <text x="700" y="52" class="title" text-anchor="middle">
-    Shell Sort 구조도
+  <text x="750" y="50" class="title" text-anchor="middle">Shell Sort 구조도</text>
+  <text x="750" y="82" class="subtitle" text-anchor="middle">
+    큰 gap에서 시작해 gap을 절반씩 줄이며, 각 단계에서 gap 간격의 삽입 정렬을 수행
   </text>
 
-  <text x="700" y="84" class="subtitle" text-anchor="middle">
-    gap을 감소시키며 gap 간격의 부분 배열을 삽입 정렬 방식으로 정렬
-  </text>
-
-  <!-- ===================================================== -->
   <!-- Start -->
-  <!-- ===================================================== -->
+  <rect x="470" y="115" width="560" height="72" rx="36" class="inputBox"/>
+  <text x="750" y="146" class="text">입력 배열 a / values</text>
+  <text x="750" y="172" class="small">n개의 원소를 가진 배열</text>
+  <path d="M750 187 L750 225" class="arrow"/>
 
-  <rect x="500" y="120" width="400" height="75" rx="38"
-        class="inputBox"/>
+  <!-- Gap initialization -->
+  <rect x="395" y="225" width="710" height="118" rx="14" class="gapBox"/>
+  <text x="750" y="258" class="sectionBlue">1. 초기 gap 설정</text>
+  <text x="750" y="292" class="code">gap = n / 4</text>
+  <text x="750" y="319" class="small">gap == 0이면 gap = 1</text>
+  <text x="750" y="338" class="small">C: size_t gap = n / 4 &#160;&#160;|&#160;&#160; Python: gap = n // 4</text>
+  <path d="M750 343 L750 390" class="arrowBlue"/>
 
-  <text x="700" y="153" class="text">
-    입력 배열 a / values
-  </text>
-
-  <text x="700" y="180" class="small">
-    n개의 원소
-  </text>
-
-  <path d="M700 195 L700 245" class="arrow"/>
-
-  <!-- ===================================================== -->
-  <!-- Initial gap -->
-  <!-- ===================================================== -->
-
-  <rect x="410" y="245" width="580" height="120" rx="14"
-        class="gapBox"/>
-
-  <text x="700" y="280" class="sectionBlue">
-    1. 초기 gap 설정
-  </text>
-
-  <text x="700" y="315" class="code">
-    gap = n / 4
-  </text>
-
-  <text x="700" y="345" class="small">
-    gap == 0이면 gap = 1
-  </text>
-
-  <path d="M700 365 L700 415" class="arrowBlue"/>
-
-  <!-- ===================================================== -->
-  <!-- Outer while -->
-  <!-- ===================================================== -->
-
-  <polygon points="700,415 885,475 700,535 515,475"
-           class="decision"/>
-
-  <text x="700" y="469" class="decisionText">
-    gap &gt; 0 ?
-  </text>
+  <!-- Outer loop decision -->
+  <polygon points="750,390 925,445 750,500 575,445" class="decision"/>
+  <text x="750" y="450" class="decisionText">gap &gt; 0 ?</text>
 
   <!-- NO -> finish -->
-  <path d="M885 475 L1120 475 L1120 1870 L900 1870"
-        class="arrow"/>
-
-  <text x="930" y="457" class="label">
-    아니오
-  </text>
+  <path d="M925 445 L1190 445 L1190 1870 L1010 1870" class="arrow"/>
+  <text x="950" y="426" class="label">아니오 → 종료</text>
 
   <!-- YES -->
-  <path d="M700 535 L700 585" class="arrow"/>
-  <text x="720" y="562" class="label">예</text>
+  <path d="M750 500 L750 540" class="arrow"/>
+  <text x="772" y="526" class="label">예</text>
 
-  <!-- ===================================================== -->
-  <!-- for loop -->
-  <!-- ===================================================== -->
-
-  <rect x="350" y="585" width="700" height="125" rx="14"
-        class="loopBox"/>
-
-  <text x="700" y="620" class="sectionGreen">
-    2. gap 간격의 삽입 정렬
+  <!-- Outer for loop container -->
+  <rect x="330" y="540" width="840" height="1130" rx="18" class="loopBox"/>
+  <text x="750" y="575" class="sectionGreen">2. 현재 gap에서 전체 배열을 gap-insertion sort</text>
+  <text x="750" y="607" class="code">for i = gap ... n-1</text>
+  <text x="750" y="633" class="small">
+    i를 1씩 증가시키며 각 원소를 자신의 gap-부분배열에 삽입
   </text>
 
-  <text x="700" y="655" class="code">
-    for i = gap ... n-1
-  </text>
+  <!-- For-loop start -->
+  <path d="M750 653 L750 680" class="arrowGreen"/>
 
-  <text x="700" y="686" class="small">
-    각 원소를 gap 간격으로 떨어진 이전 원소들과 비교
-  </text>
+  <rect x="425" y="680" width="650" height="105" rx="13" class="box"/>
+  <text x="750" y="712" class="sectionBlue">3. 현재 원소 준비</text>
+  <text x="750" y="742" class="code">value = a[i]</text>
+  <text x="750" y="769" class="code">j = i</text>
 
-  <path d="M700 710 L700 760" class="arrowGreen"/>
+  <path d="M750 785 L750 825" class="arrow"/>
 
-  <!-- ===================================================== -->
-  <!-- Save value / initialize j -->
-  <!-- ===================================================== -->
+  <!-- Inner while decision -->
+  <polygon points="750,825 930,880 750,935 570,880" class="decision"/>
+  <text x="750" y="885" class="decisionText">j &gt;= gap ?</text>
 
-  <rect x="390" y="760" width="620" height="110" rx="13"
-        class="box"/>
+  <!-- NO inner while -> insertion: shift box를 우회하여 삽입 단계로 -->
+  <path d="M570 880 L245 880 L245 1345 L425 1345" class="arrow"/>
+  <text x="485" y="860" class="label">아니오</text>
 
-  <text x="700" y="795" class="text">
-    value = a[i]
-  </text>
+  <!-- YES -> compare -->
+  <path d="M750 935 L750 965" class="arrowOrange"/>
+  <text x="772" y="955" class="label">예</text>
 
-  <text x="700" y="830" class="text">
-    j = i
-  </text>
-
-  <text x="700" y="857" class="small">
-    현재 삽입할 값을 저장하고 비교 위치 설정
-  </text>
-
-  <path d="M700 870 L700 920" class="arrow"/>
-
-    <!-- ===================================================== -->
-  <!-- Inner while : j >= gap -->
-  <!-- ===================================================== -->
-
-  <polygon points="700,920 885,980 700,1040 515,980"
-           class="decision"/>
-
-  <text x="700" y="974" class="decisionText">
-    j &gt;= gap ?
-  </text>
-
-  <!-- Yes -> compare -->
-  <path d="M700 1040 L700 1085" class="arrow"/>
-  <text x="722" y="1065" class="label">예</text>
-
-  <!-- No -> value insertion -->
-  <path d="M515 980 L300 980 L300 1435 L510 1435"
-        class="arrow"/>
-  <text x="415" y="962" class="label">
-    아니오
-  </text>
-
-  <!-- ===================================================== -->
   <!-- Compare -->
-  <!-- ===================================================== -->
+  <rect x="425" y="965" width="650" height="122" rx="14" class="compareBox"/>
+  <text x="750" y="997" class="sectionOrange">4. gap만큼 떨어진 이전 원소와 비교</text>
+  <text x="750" y="1029" class="code">a[j - gap] &lt;= value ?</text>
+  <text x="750" y="1058" class="small">비교를 수행할 때마다 comparisons += 1</text>
+  <text x="750" y="1079" class="small">같거나 작으면 현재 위치에 그대로 두고 inner while 종료</text>
 
-  <rect x="350" y="1085" width="700" height="140" rx="14"
-        class="compareBox"/>
+  <!-- Compare YES -> insertion: shift를 거치지 않고 삽입 단계로 -->
+  <path d="M425 1026 L245 1026 L245 1345 L425 1345" class="arrowOrange"/>
+  <text x="310" y="1008" class="label">예 → break</text>
 
-  <text x="700" y="1120" class="sectionOrange">
-    3. gap만큼 떨어진 원소 비교
-  </text>
+  <!-- Compare NO -> shift -->
+  <path d="M750 1087 L750 1120" class="arrowPurple"/>
+  <text x="772" y="1109" class="label">아니오</text>
 
-  <text x="700" y="1155" class="code">
-    a[j - gap] &lt;= value ?
-  </text>
-
-  <text x="700" y="1187" class="small">
-    비교할 때마다 comparisons += 1
-  </text>
-
-  <!-- Yes -> break -> insertion -->
-  <path d="M350 1155 L180 1155 L180 1435 L510 1435"
-        class="arrow"/>
-  <text x="260" y="1137" class="label">
-    예 → break
-  </text>
-
-  <!-- No -> shift -->
-  <path d="M700 1225 L700 1270" class="arrow"/>
-  <text x="722" y="1252" class="label">
-    아니오
-  </text>
-
-  <!-- ===================================================== -->
   <!-- Shift -->
-  <!-- ===================================================== -->
+  <rect x="425" y="1120" width="650" height="135" rx="14" class="shiftBox"/>
+  <text x="750" y="1152" class="sectionPurple">5. gap만큼 뒤로 이동</text>
+  <text x="750" y="1183" class="code">a[j] = a[j - gap]</text>
+  <text x="750" y="1211" class="code">j -= gap</text>
+  <text x="750" y="1239" class="small">이동마다 moves += 1</text>
 
-  <rect x="350" y="1270" width="700" height="135" rx="14"
-        class="shiftBox"/>
-
-  <text x="700" y="1305"
-        style="font-family:'Noto Sans KR','Malgun Gothic',Arial,sans-serif;
-               font-size:18px;font-weight:700;fill:#6d28d9;
-               text-anchor:middle;">
-    4. gap 간격으로 원소 이동
+  <!-- Shift loop back: visually returns to inner condition -->
+  <path d="M1075 1187 L1115 1187 L1115 880 L930 880" class="loop"/>
+  <text x="1132" y="1065" class="label" transform="rotate(-90 1132 1065)">
+    다시 j &gt;= gap 확인
   </text>
 
-  <text x="700" y="1340" class="code">
-    a[j] = a[j - gap]
-  </text>
+  <!-- Insertion -->
+  <rect x="425" y="1275" width="650" height="140" rx="14" class="box"/>
+  <text x="750" y="1307" class="sectionBlue">6. value 삽입</text>
+  <text x="750" y="1338" class="code">if j != i:</text>
+  <text x="750" y="1366" class="code">a[j] = value</text>
+  <text x="750" y="1395" class="small">실제로 이동했다면 moves += 1</text>
+  <text x="438" y="1338" class="label">while 종료</text>
 
-  <text x="700" y="1371" class="code">
-    j -= gap
-  </text>
+  <!-- Shift -> insertion: shift가 끝난 뒤 value를 삽입 -->
+  <path d="M750 1255 L750 1275" class="arrowPurple"/>
 
-  <text x="700" y="1396" class="small">
-    이동마다 moves += 1
-  </text>
+  <!-- i loop decision -->
+  <path d="M750 1415 L750 1448" class="arrow"/>
+  <polygon points="750,1448 910,1498 750,1548 590,1498" class="decision"/>
+  <text x="750" y="1503" class="decisionText">i &lt; n ?</text>
 
-  <!-- Shift -> back to j >= gap -->
-  <path d="M1050 1338
-           L1160 1338
-           L1160 980
-           L885 980"
-        class="loop"/>
+  <!-- YES: next i -->
+  <path d="M590 1498 L370 1498 L370 622 L330 622" class="loop"/>
+  <text x="398" y="1478" class="label">예 → 다음 i</text>
 
-  <text x="1175" y="1160" class="label"
-        transform="rotate(-90 1175 1160)">
-    다시 j >= gap 확인
-  </text>
+  <!-- NO: exit for loop -->
+  <path d="M750 1548 L750 1625" class="arrow"/>
+  <text x="772" y="1587" class="label">아니오 → 현재 gap 완료</text>
 
-  <!-- ===================================================== -->
-  <!-- Value insertion -->
-  <!-- ===================================================== -->
+  <!-- Note on for-loop increment -->
+  <rect x="790" y="1430" width="330" height="92" rx="10" class="sideBox"/>
+  <text x="810" y="1455" class="noteTitle">for문의 실제 의미</text>
+  <text x="810" y="1478" class="noteText">C: i가 1씩 증가</text>
+  <text x="810" y="1499" class="noteText">Python: index가 1씩 증가</text>
 
-  <path d="M510 1435 L510 1485 L700 1485"
-        class="arrow"/>
-
-  <rect x="350" y="1485" width="700" height="125" rx="14"
-        class="box"/>
-
-  <text x="700" y="1520" class="sectionBlue">
-    5. value 삽입
-  </text>
-
-  <text x="700" y="1552" class="code">
-    if j != i:
-  </text>
-
-  <text x="700" y="1580" class="code">
-    a[j] = value
-  </text>
-
-  <text x="700" y="1602" class="small">
-    실제 이동이 있었던 경우 moves += 1
-  </text>
-
-  <path d="M700 1610 L700 1655" class="arrow"/>
-
-  <!-- ===================================================== -->
-  <!-- for-loop condition -->
-  <!-- ===================================================== -->
-
-  <polygon points="700,1655 880,1715 700,1775 520,1715"
-           class="decision"/>
-
-  <text x="700" y="1710" class="decisionText">
-    i &lt; n ?
-  </text>
-
-  <!-- Yes -> next i -->
-  <path d="M520 1715
-           L250 1715
-           L250 647
-           L350 647"
-        class="loop"/>
-
-  <text x="380" y="1695" class="label">
-    예 → 다음 i
-  </text>
-
-  <!-- No -> gap decrease -->
-  <path d="M700 1775 L700 1820" class="arrow"/>
-  <text x="722" y="1800" class="label">
-    아니오
-  </text>
-
-  <!-- ===================================================== -->
   <!-- Gap decrease -->
-  <!-- ===================================================== -->
-
-  <rect x="370" y="1820" width="660" height="115" rx="14"
-        class="gapBox"/>
-
-  <text x="700" y="1855" class="sectionBlue">
-    6. gap 감소
+  <rect x="425" y="1625" width="650" height="120" rx="14" class="gapBox"/>
+  <text x="750" y="1657" class="sectionBlue">7. gap 감소</text>
+  <text x="750" y="1690" class="code">gap /= 2 &#160;&#160; / &#160;&#160; gap //= 2</text>
+  <text x="750" y="1718" class="small">C: 정수 나눗셈으로 절반 &#160;&#160; Python: // 연산으로 절반</text>
+  <path d="M425 1685 L205 1685 L205 445 L575 445" class="loop"/>
+  <text x="188" y="1135" class="label" transform="rotate(-90 188 1135)">
+    다음 gap 단계로 돌아감
   </text>
 
-  <text x="700" y="1890" class="code">
-    gap /= 2
-  </text>
+  <!-- Finish -->
+  <rect x="510" y="1820" width="480" height="72" rx="36" class="finish"/>
+  <text x="750" y="1851" class="text">gap == 0 → 정렬 완료</text>
+  <text x="750" y="1876" class="small">최종적으로 전체 배열이 오름차순 정렬됨</text>
 
-  <text x="700" y="1917" class="small">
-    모든 i 처리가 끝난 후 다음 gap 단계로 이동
-  </text>
+  <!-- Outer-loop finish connector -->
+  <path d="M1190 1870 L990 1870" class="arrow"/>
 
-  <!-- gap loop back -->
-  <path d="M370 1878
-           L100 1878
-           L100 475
-           L515 475"
-        class="loop"/>
+  <!-- Side explanation -->
+  <rect x="1130" y="560" width="300" height="560" rx="14" class="sideBox"/>
+  <text x="1280" y="592" class="noteTitle" text-anchor="middle">구조를 읽는 핵심</text>
 
-  <text x="82" y="1120" class="label"
-        transform="rotate(-90 82 1120)">
-    다음 gap 단계
+  <text x="1155" y="630" class="noteText">① 바깥쪽 while</text>
+  <text x="1155" y="653" class="noteText">   gap을 계속 줄인다.</text>
+
+  <text x="1155" y="695" class="noteText">② 가운데 for</text>
+  <text x="1155" y="718" class="noteText">   i = gap부터 n-1까지</text>
+  <text x="1155" y="741" class="noteText">   모든 원소를 처리한다.</text>
+
+  <text x="1155" y="783" class="noteText">③ 안쪽 while</text>
+  <text x="1155" y="806" class="noteText">   j를 gap씩 감소시키며</text>
+  <text x="1155" y="829" class="noteText">   이전 원소를 검사한다.</text>
+
+  <text x="1155" y="871" class="noteText">④ 비교 결과</text>
+  <text x="1155" y="894" class="noteText">   a[j-gap] ≤ value</text>
+  <text x="1155" y="917" class="noteText">   → break</text>
+  <text x="1155" y="940" class="noteText">   아니면 → shift → j -= gap</text>
+
+  <text x="1155" y="982" class="noteText">⑤ while 종료 후</text>
+  <text x="1155" y="1005" class="noteText">   이동이 있었다면</text>
+  <text x="1155" y="1028" class="noteText">   value를 a[j]에 삽입한다.</text>
+
+  <text x="1155" y="1070" class="noteText">⑥ for가 끝나면</text>
+  <text x="1155" y="1093" class="noteText">   gap을 절반으로 줄인다.</text>
+
+  <!-- C/Python correspondence -->
+  <rect x="1130" y="1160" width="300" height="420" rx="14" class="sideBox"/>
+  <text x="1280" y="1192" class="noteTitle" text-anchor="middle">C ↔ Python 대응</text>
+
+  <text x="1150" y="1230" class="codeLeft">C: value = a[i]</text>
+  <text x="1150" y="1254" class="codeLeft">Py: value = result[index]</text>
+
+  <text x="1150" y="1294" class="codeLeft">C: j = i</text>
+  <text x="1150" y="1318" class="codeLeft">Py: position = index</text>
+
+  <text x="1150" y="1358" class="codeLeft">C: a[j] = a[j-gap]</text>
+  <text x="1150" y="1382" class="codeLeft">Py: result[position]</text>
+  <text x="1150" y="1404" class="codeLeft">    = result[position-gap]</text>
+
+  <text x="1150" y="1444" class="codeLeft">C: j -= gap</text>
+  <text x="1150" y="1468" class="codeLeft">Py: position -= gap</text>
+
+  <text x="1150" y="1508" class="codeLeft">C: gap /= 2</text>
+  <text x="1150" y="1532" class="codeLeft">Py: gap //= 2</text>
+
+  <!-- Bottom conceptual summary -->
+  <rect x="220" y="1925" width="1060" height="82" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="750" y="1955" class="noteTitle" text-anchor="middle">
+    핵심: Shell Sort = gap을 둔 삽입 정렬을 여러 gap에 대해 반복
   </text>
+  <text x="750" y="1982" class="noteText" text-anchor="middle">
+    gap이 클 때 멀리 떨어진 원소를 먼저 정리하고 → gap을 줄이면서 → gap = 1에서 일반적인 삽입 정렬 형태로 마무리
+  </text>
+</svg>
