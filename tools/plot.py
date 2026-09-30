@@ -24,34 +24,32 @@ INPUTS = [
 
 def read_rows(path="report/results.csv"):
     with open(path, newline="", encoding="utf-8") as source:
-        return list(csv.DictReader(source))
+        rows = list(csv.DictReader(source))
+
+    if not rows:
+        raise SystemExit(
+            f"No result data found in {path}"
+        )
+
+    return rows
 
 
 def smart_format(value):
-    """
-    Format graph values compactly.
-
-    - 0 -> "0"
-    - Very small values -> scientific notation
-    - Small values -> decimal notation
-    - Medium values -> integer or one decimal place
-    - Large values -> K / M notation
-    """
     if value == 0:
         return "0"
 
     if abs(value) < 0.001:
         return f"{value:.1e}"
-    elif abs(value) < 1:
+    if abs(value) < 1:
         return f"{value:.3f}"
-    elif abs(value) < 1000:
+    if abs(value) < 1000:
         if value == int(value):
             return f"{int(value)}"
         return f"{value:.1f}"
-    elif abs(value) < 1_000_000:
+    if abs(value) < 1_000_000:
         return f"{value / 1000:.1f}K"
-    else:
-        return f"{value / 1_000_000:.2f}M"
+
+    return f"{value / 1_000_000:.2f}M"
 
 
 def write_svg(path, title, ylabel, series, x_labels):
@@ -64,12 +62,15 @@ def write_svg(path, title, ylabel, series, x_labels):
         for _, value in points
     ]
 
-    maximum = max(values or [1]) or 1
+    maximum = max(values or [1])
+    if maximum <= 0:
+        maximum = 1
 
     chunks = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" '
-        f'viewBox="0 0 {width} {height}">',
-
+        (
+            f'<svg xmlns="http://www.w3.org/2000/svg" '
+            f'viewBox="0 0 {width} {height}">'
+        ),
         (
             "<style>"
             "text{font:13px sans-serif}"
@@ -80,19 +81,16 @@ def write_svg(path, title, ylabel, series, x_labels):
             ".point-label{font-size:10px}"
             "</style>"
         ),
-
         (
             f'<text class="title" x="{left}" y="30">'
             f'{html.escape(title)}</text>'
         ),
-
         (
             f'<text transform="translate(18 '
             f'{top + plot_h / 2}) rotate(-90)" '
             f'text-anchor="middle">'
             f'{html.escape(ylabel)}</text>'
         ),
-
         (
             f'<line class="axis" '
             f'x1="{left}" y1="{top}" '
@@ -103,7 +101,6 @@ def write_svg(path, title, ylabel, series, x_labels):
         ),
     ]
 
-    # Grid and y-axis labels.
     for tick in range(5):
         y = top + plot_h - tick * plot_h / 4
         value = maximum * tick / 4
@@ -120,7 +117,6 @@ def write_svg(path, title, ylabel, series, x_labels):
             f'{smart_format(value)}</text>'
         )
 
-    # X-axis labels.
     count = max(len(x_labels), 1)
 
     for index, label in enumerate(x_labels):
@@ -133,21 +129,16 @@ def write_svg(path, title, ylabel, series, x_labels):
             f'{html.escape(str(label))}</text>'
         )
 
-    # Data lines, points, and value labels.
     for name, points in series.items():
         coords = []
 
         for index, (_, value) in enumerate(points):
             x = left + index * plot_w / max(count - 1, 1)
-
-            if maximum == 0:
-                y = top + plot_h
-            else:
-                y = (
-                    top
-                    + plot_h
-                    - value / maximum * plot_h
-                )
+            y = (
+                top
+                + plot_h
+                - value / maximum * plot_h
+            )
 
             coords.append(f"{x:.1f},{y:.1f}")
 
@@ -178,7 +169,6 @@ def write_svg(path, title, ylabel, series, x_labels):
                 f'{label}</text>'
             )
 
-    # Legend.
     for index, name in enumerate(series):
         x = left + index * 170
         color = COLORS.get(name, "#777")
@@ -222,7 +212,7 @@ def grouped(rows, metric, groups):
 
             if not matches:
                 raise SystemExit(
-                    f"Missing data: "
+                    "Missing data: "
                     f"algorithm={algorithm}, "
                     f"input={group}"
                 )
@@ -247,15 +237,15 @@ def main():
 
     os.makedirs("report", exist_ok=True)
 
-    # 1. Theoretical complexity graph.
+    # 1. Conceptual, not measured, complexity illustration.
     write_svg(
         "report/complexity.svg",
-        "Theoretical growth (conceptual)",
-        "relative cost",
+        "Conceptual complexity growth (illustrative)",
+        "illustrative relative cost",
         {
             "shellSort": [
-                ("n", 2),
-                ("n²", 5),
+                ("n", 1),
+                ("n^1.5", 3),
             ],
             "countingSort": [
                 ("n", 1),
@@ -263,16 +253,35 @@ def main():
             ],
             "cocktailShakerSort": [
                 ("n", 1),
-                ("n²", 6),
+                ("n^2", 6),
             ],
         },
         ["small", "large"],
     )
 
+    input_rows = [
+        row
+        for row in rows
+        if row["input"] in INPUTS
+    ]
+
+    input_sizes = {
+        int(row["n"])
+        for row in input_rows
+    }
+
+    if len(input_sizes) != 1:
+        raise SystemExit(
+            f"Expected one common input size for input-order "
+            f"graphs, found: {sorted(input_sizes)}"
+        )
+
+    input_n = next(iter(input_sizes))
+
     # 2. Execution time by input order.
     write_svg(
         "report/input-time.svg",
-        "Execution time by input order (n=2000)",
+        f"Execution time by input order (n={input_n})",
         "time (ms)",
         grouped(
             rows,
@@ -285,7 +294,7 @@ def main():
     # 3. Comparisons by input order.
     write_svg(
         "report/input-comparisons.svg",
-        "Comparisons by input order (n=2000)",
+        f"Comparisons by input order (n={input_n})",
         "comparisons",
         grouped(
             rows,
@@ -298,7 +307,7 @@ def main():
     # 4. Moves by input order.
     write_svg(
         "report/input-moves.svg",
-        "Moves by input order (n=2000)",
+        f"Moves by input order (n={input_n})",
         "moves",
         grouped(
             rows,
@@ -328,17 +337,9 @@ def main():
         }
     )
 
-    expected_sizes = [
-        128,
-        256,
-        512,
-        1024,
-        2048,
-    ]
-
-    if sizes != expected_sizes:
+    if len(sizes) < 2:
         raise SystemExit(
-            f"Unexpected block sizes: {sizes}"
+            f"Need at least two block sizes, found: {sizes}"
         )
 
     scale_series = {}
@@ -358,7 +359,7 @@ def main():
 
             if len(matching) != 1:
                 raise SystemExit(
-                    f"Expected exactly one block row "
+                    "Expected exactly one block row "
                     f"for {algorithm}, n={size}, "
                     f"found {len(matching)}"
                 )
